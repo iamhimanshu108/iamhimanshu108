@@ -32,20 +32,20 @@ I love to work on Full Stack Web Development || FrontEnd || BackEnd || and alway
 
 ### My GitHub Status
 
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=iamhimanshu108) ![Github stats](https://github-readme-stats.vercel.app/api?username=iamhimanshu108&show_icons=true)
+<div align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=iamhimanshu108&hide_title=true&hide_rank=false&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=dracula&locale=en&hide_border=true" height="150" alt="stats graph"  />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs?username=iamhimanshu108&locale=en&hide_title=true&layout=compact&card_width=320&langs_count=5&theme=dracula&hide_border=true" height="150" alt="languages graph"  />
+  <img src="https://streak-stats.demolab.com?user=iamhimanshu108&locale=en&mode=daily&theme=dracula&hide_border=false&border_radius=5" height="150" alt="streak graph"  />
+</div>
 
-<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=iamhimanshu108&row=1&column=6" alt="iamhimanshu108" /></a> </p>
+<p align="center"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=iamhimanshu108&row=1&column=6" alt="iamhimanshu108" /></a> </p>
 
-<!--
-<p><img align="left" src="https://github-readme-stats.vercel.app/api/top-langs?username=iamhimanshu108&show_icons=true&locale=en&layout=compact" alt="iamhimanshu108" /></p> -->
 
-<!--
-<p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=iamhimanshu108&show_icons=true&locale=en" alt="iamhimanshu108" /></p>
 
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=iamhimanshu108&" alt="iamhimanshu108" /></p>
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=iamhimanshu108&label=Profile%20views&color=0e75b6&style=flat" alt="iamhimanshu108" /> </p>
 
-<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=iamhimanshu108" alt="iamhimanshu108" /></a> </p>
 
-<p align="left"> <a href="https://twitter.com/iamhimanshu108" target="blank"><img src="https://img.shields.io/twitter/follow/iamhimanshu108?logo=twitter&style=for-the-badge" alt="iamhimanshu108" /></a> </p>  -->
+
+
+
+
