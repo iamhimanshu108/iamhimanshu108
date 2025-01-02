@@ -22,7 +22,7 @@ I love to work on Full Stack Web Development || FrontEnd || BackEnd || and alway
 [![Insta badge](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/iamhimanshu108)
 [![codepen badge](https://img.shields.io/badge/Codepen-000000?style=for-the-badge&logo=codepen&logoColor=white)]("https://codepen.io/https://codepen.io/iamhimanshu108")
 [![devto badge](https://img.shields.io/badge/dev.to-0A0A0A?style=for-the-badge&logo=devdotto&logoColor=white)]("https://dev.to/https://dev.to/iamhimanshu108")
-[![medium badge](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)]("https://medium.com/@iamhimanshu108")
+[![medium badge](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)]("https://medium.com/@virtualcoding")
 
 
 <div align="left">
