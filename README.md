@@ -6,10 +6,10 @@
 
 I love to work on Full Stack Web Development || FrontEnd || BackEnd || and always willing to learn and work across new technologies and domains. <br/> <br/>
 
-- 🔭 I’m currently working on [React Projects](https://github.com/iamhimanshu108/React20days)
-- 🌱 I’m currently learning **React.js, Node.js, & MongoDB**
+- 🔭 I’m currently working on [SpringBoot Projects]
+- 🌱 I’m currently learning **Java, Spring, SpringBoot,**
 - 👨‍💻 All of my projects are available at [https://github.com/iamhimanshu108](https://github.com/iamhimanshu108)
-- 💬 Ask me about   👉  **React, JavaScript, HTML&CSS, MERN Stack**
+- 💬 Ask me about   👉  **Java, Core Java, SpringBoot**
 - 📫 How to reach me  👉  **iamhiamsnhu108@gmail.com**
 - 👯 Looking for an opportunity.
 
