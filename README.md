@@ -6,7 +6,7 @@
 
 I love to work on Full Stack Web Development || FrontEnd || BackEnd || and always willing to learn and work across new technologies and domains. <br/> <br/>
 
-- 🔭 I’m currently working on [SpringBoot Projects]
+- 🔭 I’m currently working as a Web Developer
 - 🌱 I’m currently learning **Java, Spring, SpringBoot,**
 - 👨‍💻 All of my projects are available at [https://github.com/iamhimanshu108](https://github.com/iamhimanshu108)
 - 💬 Ask me about   👉  **Java, Core Java, SpringBoot**
