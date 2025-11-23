@@ -1,5 +1,5 @@
 <h1 align="center">👋 Hi, I'm Himanshu Kumar</h1>
-<h3 align="center">A Passionate Full Stack Developer from Assam, India</h3>
+<h3 align="center">A Passionate Full Stack Developer  from Assam, India</h3>
 
 <p align="center">
   <img src="https://komarev.com/ghpvc/?username=iamhimanshu108&color=brightgreen&style=flat" alt="Profile views" />
