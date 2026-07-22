@@ -121,6 +121,11 @@ def main():
 
     readme_content = README_PATH.read_text(encoding="utf-8")
     updated = replace_readme_block(readme_content, new_block)
+
+    if updated == readme_content:
+        print("No changes to language stats; README not updated")
+        return
+
     README_PATH.write_text(updated, encoding="utf-8")
     print(f"Updated README language stats for {USERNAME}")
 
