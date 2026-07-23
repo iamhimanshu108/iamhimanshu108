@@ -112,6 +112,78 @@ def replace_readme_block(content: str, new_block: str) -> str:
     return pattern.sub(f"<!-- LANGUAGE_STATS_START -->\n{new_block}\n<!-- LANGUAGE_STATS_END -->", content)
 
 
+def replace_block(content: str, start_marker: str, end_marker: str, new_block: str) -> str:
+        pattern = re.compile(re.escape(start_marker) + r".*?" + re.escape(end_marker), re.S)
+        if not pattern.search(content):
+                return content
+        return pattern.sub(f"{start_marker}\n{new_block}\n{end_marker}", content)
+
+
+def build_streak(username: str):
+        if not TOKEN:
+                print("GITHUB_TOKEN not set — skipping streak update")
+                return None
+
+        query = '''
+        query($login: String!) {
+            user(login: $login) {
+                contributionsCollection {
+                    contributionCalendar {
+                        weeks {
+                            contributionDays {
+                                date
+                                contributionCount
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        '''
+
+        url = "https://api.github.com/graphql"
+        body = json.dumps({"query": query, "variables": {"login": username}}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers=HEADERS | {"Content-Type": "application/json"})
+        try:
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                        data = json.load(resp)
+        except Exception as exc:
+                print(f"Failed to fetch contribution calendar: {exc}")
+                return None
+
+        try:
+                weeks = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+        except Exception:
+                print("Unexpected GraphQL response structure; skipping streak update")
+                return None
+
+        days = []
+        for w in weeks:
+                for d in w.get("contributionDays", []):
+                        days.append({"date": d["date"], "count": d["contributionCount"]})
+
+        # build a map from date -> count
+        date_map = {d["date"]: d["count"] for d in days}
+
+        # compute current week Monday..Sunday
+        from datetime import datetime, timedelta
+
+        today = datetime.utcnow().date()
+        monday = today - timedelta(days=today.weekday())
+        week_dates = [monday + timedelta(days=i) for i in range(7)]
+
+        marks = []
+        for d in week_dates:
+                iso = d.isoformat()
+                count = date_map.get(iso, 0)
+                marks.append("✅" if count and count > 0 else "⬜")
+
+        header = "| Mon | Tue | Wed | Thu | Fri | Sat | Sun |"
+        sep = "|:---:|:---:|:---:|:---:|:---:|:---:|:---:|"
+        row = "| " + " | ".join(marks) + " |"
+        return f"{header}\n{sep}\n{row}"
+
+
 def main():
     try:
         new_block = build_stats(USERNAME)
@@ -120,14 +192,21 @@ def main():
         raise
 
     readme_content = README_PATH.read_text(encoding="utf-8")
+
+    # Update language block
     updated = replace_readme_block(readme_content, new_block)
 
+    # Update streak block if possible
+    streak_block = build_streak(USERNAME)
+    if streak_block:
+        updated = replace_block(updated, "<!-- STREAK_START -->", "<!-- STREAK_END -->", streak_block)
+
     if updated == readme_content:
-        print("No changes to language stats; README not updated")
+        print("No changes to README; not updated")
         return
 
     README_PATH.write_text(updated, encoding="utf-8")
-    print(f"Updated README language stats for {USERNAME}")
+    print(f"Updated README for {USERNAME}")
 
 
 if __name__ == "__main__":
