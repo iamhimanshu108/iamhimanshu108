@@ -11,7 +11,7 @@ A simple 7-day view — mark days you coded with ✅.
 <!-- STREAK_START -->
 | Mon | Tue | Wed | Thu | Fri | Sat | Sun |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| ⬜ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ |
+| ⬜ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ |
 <!-- STREAK_END -->
 
 Tip: Replace boxes with ✅ for completed days. Example: `✅ ✅ ✅ ⬜ ⬜ ⬜ ⬜`.
@@ -36,15 +36,15 @@ Replace bars and percentages with real data from `scripts/update_language_stats.
 📊 Language Contribution
 ⚡ Auto-updated from public repos • excluding forks
 
-🟨 JavaScript   ██████████░░░░░░░░░░   52.05%
-📄 HTML         ████░░░░░░░░░░░░░░░░   19.64%
-🎨 CSS          ██░░░░░░░░░░░░░░░░░░   11.28%
-☕ Java         ██░░░░░░░░░░░░░░░░░░   10.03%
-🔷 TypeScript   █░░░░░░░░░░░░░░░░░░░    4.73%
-🐍 Python       ░░░░░░░░░░░░░░░░░░░░    2.15%
+🟨 JavaScript   ██████████░░░░░░░░░░   51.82%
+📄 HTML         ████░░░░░░░░░░░░░░░░   19.55%
+🎨 CSS          ██░░░░░░░░░░░░░░░░░░   11.23%
+☕ Java         ██░░░░░░░░░░░░░░░░░░    9.98%
+🔷 TypeScript   █░░░░░░░░░░░░░░░░░░░    4.71%
+🐍 Python       █░░░░░░░░░░░░░░░░░░░    2.60%
 🧩 Others        ░░░░░░░░░░░░░░░░░░░░    0.12%
 ────────────────────────────────────────────
-Repos: 37 | Forks ignored: 4 | Size: 0.61 MB | Updated: 2026-07-23
+Repos: 37 | Forks ignored: 4 | Size: 0.61 MB | Updated: 2026-07-26
 ```
 <!-- LANGUAGE_STATS_END -->
 
