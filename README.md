@@ -11,7 +11,7 @@ A simple 7-day view — mark days you coded with ✅.
 <!-- STREAK_START -->
 | Mon | Tue | Wed | Thu | Fri | Sat | Sun |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| ⬜ | ✅ | ✅ | ✅ | ✅ | ⬜ | ⬜ |
+| ✅ | ✅ | ⬜ | ✅ | ✅ | ✅ | ⬜ |
 <!-- STREAK_END -->
 
 Tip: Replace boxes with ✅ for completed days. Example: `✅ ✅ ✅ ⬜ ⬜ ⬜ ⬜`.
@@ -44,7 +44,7 @@ Replace bars and percentages with real data from `scripts/update_language_stats.
 🐍 Python       █░░░░░░░░░░░░░░░░░░░    2.60%
 🧩 Others        ░░░░░░░░░░░░░░░░░░░░    0.12%
 ────────────────────────────────────────────
-Repos: 37 | Forks ignored: 4 | Size: 0.61 MB | Updated: 2026-07-26
+Repos: 37 | Forks ignored: 5 | Size: 0.61 MB | Updated: 2026-08-02
 ```
 <!-- LANGUAGE_STATS_END -->
 
