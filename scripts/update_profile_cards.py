@@ -46,40 +46,6 @@ def text(value: object) -> str:
     return html.escape(str(value))
 
 
-def contribution_total() -> int | None:
-    if not TOKEN:
-        return None
-    query = "query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions}}}}"
-    payload = json.dumps({"query": query, "variables": {"login": USERNAME}}).encode()
-    request = urllib.request.Request(
-        "https://api.github.com/graphql", data=payload,
-        headers={**HEADERS, "Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return json.load(response)["data"]["user"]["contributionsCollection"]["contributionCalendar"]["totalContributions"]
-    except Exception:
-        return None
-
-
-def write_overview(user: dict, repos: list[dict], languages: Counter[str]) -> None:
-    stars = sum(repo.get("stargazers_count", 0) for repo in repos)
-    contributions = contribution_total()
-    cards = [("PUBLIC REPOS", user.get("public_repos", len(repos))), ("TOTAL STARS", stars), ("LANGUAGES", len(languages))]
-    if contributions is not None:
-        cards[0] = ("YEAR CONTRIBUTIONS", contributions)
-    blocks = []
-    for index, (label, value) in enumerate(cards):
-        x = 38 + index * 250
-        if index:
-            blocks.append(f'<path d="M{x - 30} 42v126" stroke="#263246"/>')
-        blocks.append(f'<text x="{x}" y="80" fill="#00e5ff" font-family="monospace" font-size="14" font-weight="bold">{text(value)}</text>')
-        blocks.append(f'<text x="{x}" y="114" fill="#f0f6fc" font-family="sans-serif" font-size="31" font-weight="bold">{text(value)}</text>')
-        blocks.append(f'<text x="{x}" y="145" fill="#8b949e" font-family="monospace" font-size="12">{label}</text>')
-    body = '<text x="38" y="32" fill="#a371f7" font-family="monospace" font-size="14" font-weight="bold">GITHUB.OVERVIEW</text>' + ''.join(blocks)
-    (ASSETS / "github-overview.svg").write_text(svg_document(780, 210, body), encoding="utf-8")
-
-
 def write_languages(languages: Counter[str]) -> None:
     total = sum(languages.values()) or 1
     colors = ["#00e5ff", "#a371f7", "#ff6b8a", "#f7c948", "#58a6ff", "#2ed573"]
@@ -100,12 +66,10 @@ def write_languages(languages: Counter[str]) -> None:
 
 def main() -> None:
     ASSETS.mkdir(exist_ok=True)
-    user = get_json(f"https://api.github.com/users/{USERNAME}")
     repos = get_repositories()
     languages: Counter[str] = Counter()
     for repo in repos:
         languages.update(get_json(repo["languages_url"]))
-    write_overview(user, repos, languages)
     write_languages(languages)
 
 

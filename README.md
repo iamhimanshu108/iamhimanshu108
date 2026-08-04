@@ -11,12 +11,11 @@
 </p>
 
 <p align="center">
-  <img src="./assets/github-overview.svg" alt="Himanshu's GitHub overview" height="210" />
-  <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" height="210" />
+  <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" width="780" />
 </p>
 
 <p align="center">
-  <img src="https://streak-stats.demolab.com?user=iamhimanshu108&hide_border=true&background=0D1117&ring=00E5FF&fire=A371F7&currStreakLabel=00E5FF&sideLabels=C9D1D9&dates=8B949E&stroke=30363D" alt="Himanshu's GitHub contribution streak" />
+  <img src="https://streak-stats.demolab.com?user=iamhimanshu108&hide_border=true&background=0D1117&ring=00E5FF&fire=A371F7&currStreakLabel=00E5FF&currStreakNum=F0F6FC&sideLabels=F0F6FC&sideNums=F0F6FC&dates=C9D1D9&stroke=30363D" alt="Himanshu's GitHub contribution streak" />
 </p>
 
 <p align="center">
