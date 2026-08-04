@@ -1,68 +1,24 @@
-# Developer Weekly Streak & Language Contributions
+<p align="center">
+  <img src="./assets/profile-terminal.svg" alt="Terminal profile for Himanshu Kumar Yadav" width="100%" />
+</p>
 
-A compact, easy-to-read README layout to showcase a developer's weekly coding streak and language contribution breakdown.
+<p align="center">
+  <a href="https://www.iamhimanshu.in/">Portfolio</a> ·
+  <a href="https://github.com/iamhimanshu108">GitHub</a> ·
+  <a href="https://www.linkedin.com/in/iamhimanshu108/">LinkedIn</a> ·
+  <a href="https://x.com/iamhimanshu108">X</a> ·
+  <a href="https://www.instagram.com/iamhimanshu108/">Instagram</a>
+</p>
 
----
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=iamhimanshu108&show_icons=true&hide_border=true&bg_color=0D1117&title_color=00E5FF&icon_color=A371F7&text_color=C9D1D9&ring_color=00E5FF" alt="Himanshu's GitHub statistics" height="170" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=iamhimanshu108&layout=compact&hide_border=true&bg_color=0D1117&title_color=00E5FF&text_color=C9D1D9" alt="Himanshu's most used languages" height="170" />
+</p>
 
-## Weekly Streak
+<p align="center">
+  <img src="https://streak-stats.demolab.com?user=iamhimanshu108&hide_border=true&background=0D1117&ring=00E5FF&fire=A371F7&currStreakLabel=00E5FF&sideLabels=C9D1D9&dates=8B949E&stroke=30363D" alt="Himanshu's GitHub contribution streak" />
+</p>
 
-A simple 7-day view — mark days you coded with ✅.
-
-<!-- STREAK_START -->
-| Mon | Tue | Wed | Thu | Fri | Sat | Sun |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| ✅ | ✅ | ⬜ | ✅ | ✅ | ✅ | ⬜ |
-<!-- STREAK_END -->
-
-Tip: Replace boxes with ✅ for completed days. Example: `✅ ✅ ✅ ⬜ ⬜ ⬜ ⬜`.
-
----
-
-## Language Contributions
-
-Text-based bars let readers quickly scan your language mix. Update these numbers from your stats script.
-
-| Language | Contribution |
-|---|---:|
-| Python | ████████ 45% |
-| JavaScript | ██████ 30% |
-| HTML/CSS | ███ 15% |
-| Other | █ 10% |
-
-Replace bars and percentages with real data from `scripts/update_language_stats.py`.
-
-<!-- LANGUAGE_STATS_START -->
-```text
-📊 Language Contribution
-⚡ Auto-updated from public repos • excluding forks
-
-🟨 JavaScript   ██████████░░░░░░░░░░   51.82%
-📄 HTML         ████░░░░░░░░░░░░░░░░   19.55%
-🎨 CSS          ██░░░░░░░░░░░░░░░░░░   11.23%
-☕ Java         ██░░░░░░░░░░░░░░░░░░    9.98%
-🔷 TypeScript   █░░░░░░░░░░░░░░░░░░░    4.71%
-🐍 Python       █░░░░░░░░░░░░░░░░░░░    2.60%
-🧩 Others        ░░░░░░░░░░░░░░░░░░░░    0.12%
-────────────────────────────────────────────
-Repos: 37 | Forks ignored: 5 | Size: 0.61 MB | Updated: 2026-08-02
-```
-<!-- LANGUAGE_STATS_END -->
-
----
-
-## Update Instructions
-
-- Manual: edit this file and change the streak boxes and language table.
-- Automated: run the repo script to regenerate language stats:
-
-```bash
-python3 scripts/update_language_stats.py
-```
-
-Want me to:
-- Hook `scripts/update_language_stats.py` to write the language table into this README automatically,
-- or add a GitHub Action to refresh it weekly?
-
----
-
-Made simple — clear, minimal, and easy to automate.
+<p align="center">
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=iamhimanshu108&bg_color=0D1117&color=C9D1D9&line=00E5FF&point=A371F7&area=true&area_color=00E5FF&hide_border=true" alt="Himanshu's contribution activity graph" width="100%" />
+</p>
