@@ -3,16 +3,16 @@
 </p>
 
 <p align="center">
-  <a href="https://www.iamhimanshu.in/">Portfolio</a> ·
-  <a href="https://github.com/iamhimanshu108">GitHub</a> ·
-  <a href="https://www.linkedin.com/in/iamhimanshu108/">LinkedIn</a> ·
-  <a href="https://x.com/iamhimanshu108">X</a> ·
+  <a href="https://www.iamhimanshu.in/">Portfolio</a> &middot;
+  <a href="https://github.com/iamhimanshu108">GitHub</a> &middot;
+  <a href="https://www.linkedin.com/in/iamhimanshu108/">LinkedIn</a> &middot;
+  <a href="https://x.com/iamhimanshu108">X</a> &middot;
   <a href="https://www.instagram.com/iamhimanshu108/">Instagram</a>
 </p>
 
 <p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=iamhimanshu108&show_icons=true&hide_border=true&bg_color=0D1117&title_color=00E5FF&icon_color=A371F7&text_color=C9D1D9&ring_color=00E5FF" alt="Himanshu's GitHub statistics" height="170" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=iamhimanshu108&layout=compact&hide_border=true&bg_color=0D1117&title_color=00E5FF&text_color=C9D1D9" alt="Himanshu's most used languages" height="170" />
+  <img src="./assets/github-overview.svg" alt="Himanshu's GitHub overview" height="210" />
+  <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" height="210" />
 </p>
 
 <p align="center">
