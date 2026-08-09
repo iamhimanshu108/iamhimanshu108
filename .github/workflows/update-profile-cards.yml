@@ -23,7 +23,11 @@ jobs:
         run: python scripts/update_profile_cards.py
       - name: Commit refreshed cards
         run: |
+<<<<<<< HEAD
           git add assets/*.svg
+=======
+          git add assets/github-overview.svg assets/language-contributions.svg
+>>>>>>> parent of 1d556e6 (update)
           if git diff --cached --quiet; then
             echo "No profile card changes"
           else
