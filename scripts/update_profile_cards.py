@@ -66,7 +66,7 @@ def flatten_days(calendar: dict[str, Any]) -> list[dict[str, Any]]:
     return [day for week in calendar.get("weeks", []) for day in week.get("contributionDays", [])]
 
 
-def streaks(days: Iterable[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+def streaks(days: Iterable[dict[str, Any]], current_as_of: date | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
     active = [(date.fromisoformat(day["date"]), int(day["contributionCount"])) for day in days]
     runs: list[tuple[date, date, int]] = []
     start: date | None = None
@@ -74,6 +74,9 @@ def streaks(days: Iterable[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
     for day, count in sorted(active):
         if count > 0:
             if start is None:
+                start = day
+            elif end is not None and day != end + timedelta(days=1):
+                runs.append((start, end, (end - start).days + 1))
                 start = day
             end = day
         elif start is not None and end is not None:
@@ -86,7 +89,11 @@ def streaks(days: Iterable[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
         return empty, empty.copy()
     current = runs[-1]
     longest = max(runs, key=lambda run: run[2])
-    return ({"count": current[2], "start": current[0], "end": current[1]},
+    if current_as_of is not None and current[1] < current_as_of - timedelta(days=1):
+        current_result = empty
+    else:
+        current_result = {"count": current[2], "start": current[0], "end": current[1]}
+    return (current_result,
             {"count": longest[2], "start": longest[0], "end": longest[1]})
 
 
@@ -99,29 +106,35 @@ def format_range(streak: dict[str, Any]) -> str:
     return f"{start.strftime('%b')} {start.day} – {end.strftime('%b')} {end.day}, {end.year}"
 
 
-def get_contributions(now: datetime | None = None) -> dict[str, Any]:
+def get_contributions(history_from: datetime, now: datetime | None = None) -> dict[str, Any]:
     if not TOKEN:
         raise RuntimeError("GITHUB_TOKEN is required to generate contribution statistics.")
     now = now or datetime.now(timezone.utc)
     query = """
-      query ProfileContributions($login: String!, $from: DateTime!, $to: DateTime!) {
+      query ProfileContributions($login: String!, $yearFrom: DateTime!, $historyFrom: DateTime!, $to: DateTime!) {
         user(login: $login) {
-          contributionsCollection(from: $from, to: $to) {
+          lastYear: contributionsCollection(from: $yearFrom, to: $to) {
             totalCommitContributions totalPullRequestContributions totalIssueContributions
             totalRepositoriesWithContributedCommits
             contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } }
+          }
+          allTime: contributionsCollection(from: $historyFrom, to: $to) {
+            contributionCalendar { weeks { contributionDays { date contributionCount } } }
           }
         }
       }
     """
     result = get_json("https://api.github.com/graphql", {
         "query": query,
-        "variables": {"login": USERNAME, "from": (now - timedelta(days=365)).isoformat(), "to": now.isoformat()},
+        "variables": {"login": USERNAME, "yearFrom": (now - timedelta(days=365)).isoformat(),
+                      "historyFrom": history_from.isoformat(), "to": now.isoformat()},
     })
     if result.get("errors"):
         raise RuntimeError(f"GitHub GraphQL error: {result['errors'][0]['message']}")
-    collection = result["data"]["user"]["contributionsCollection"]
-    current, longest = streaks(flatten_days(collection["contributionCalendar"]))
+    user = result["data"]["user"]
+    collection = user["lastYear"]
+    current, _ = streaks(flatten_days(collection["contributionCalendar"]), now.date())
+    _, longest = streaks(flatten_days(user["allTime"]["contributionCalendar"]))
     return {
         "total": collection["contributionCalendar"]["totalContributions"], "current": current,
         "longest": longest, "commits": collection["totalCommitContributions"],
@@ -160,6 +173,20 @@ def render_overview_svg(user: dict[str, Any], repos: list[dict[str, Any]], langu
         blocks.append(f'<text x="{x}" y="92" fill="#e5ffe9" font-family="monospace" font-size="35" font-weight="bold">{esc(value)}</text>')
         blocks.append(f'<text x="{x}" y="126" fill="#00ff66" font-family="monospace" font-size="12">&gt; {label}</text>')
     return svg_document(780, 180, ''.join(blocks), "Himanshu's GitHub overview")
+
+
+def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contributions: int) -> str:
+    values = [("CURRENT STREAK", f'{current["count"]} DAYS'),
+              ("LONGEST STREAK", f'{longest["count"]} DAYS'),
+              ("CONTRIBUTIONS / 1 YEAR", contributions)]
+    blocks: list[str] = ['<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ github --activity</text>']
+    for index, (label, value) in enumerate(values):
+        x = 38 + index * 250
+        if index:
+            blocks.append(f'<path d="M{x - 30} 42v126" stroke="#176b38"/>')
+        blocks.append(f'<text x="{x}" y="92" fill="#e5ffe9" font-family="monospace" font-size="35" font-weight="bold">{esc(value)}</text>')
+        blocks.append(f'<text x="{x}" y="126" fill="#00ff66" font-family="monospace" font-size="12">&gt; {label}</text>')
+    return svg_document(780, 180, ''.join(blocks), "Himanshu's GitHub activity")
 
 
 def render_languages_svg(languages: Counter[str]) -> str:
@@ -230,9 +257,11 @@ def main() -> None:
     languages: Counter[str] = Counter()
     for repo in repositories:
         languages.update(get_json(repo["languages_url"]))
-    stats = get_contributions()
+    created_at = datetime.fromisoformat(user["created_at"].replace("Z", "+00:00"))
+    stats = get_contributions(created_at)
     render_profile_gif(fetch_avatar_bytes(user.get("avatar_url")), ASSETS / "profile-bio.gif")
     (ASSETS / "github-overview.svg").write_text(render_overview_svg(user, repositories, languages, stats["total"]), encoding="utf-8")
+    (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
 
 
