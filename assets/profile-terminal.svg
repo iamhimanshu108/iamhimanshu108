@@ -17,7 +17,7 @@
   <rect x="40" y="110" width="410" height="350" rx="3" fill="#08111f" stroke="#00d9ff" stroke-opacity=".55"/>
   <path d="M40 128v-18h18M432 110h18v18M40 442v18h18M432 460h18v-18" fill="none" stroke="#00d9ff" stroke-width="3"/>
   <circle class="avatar-ring" cx="245" cy="285" r="123" fill="#101a32" stroke="#9b7bff" stroke-width="2" filter="url(#glow)"/>
-  <image class="avatar" href="profile-photo.png" x="-55" y="57" width="600" height="600" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatar-clip)"/>
+  <image class="avatar" href="profile-photo.png" x="95" y="135" width="300" height="300" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatar-clip)"/>
   <rect class="scan" x="130" y="170" width="230" height="2" fill="#00d9ff" opacity=".5" clip-path="url(#avatar-clip)"/>
   <circle cx="245" cy="285" r="115" fill="none" stroke="#00d9ff" stroke-opacity=".7"/>
   <text x="245" y="436" text-anchor="middle" fill="#9b7bff" font-family="monospace" font-size="13">// building in public</text>
