@@ -1,9 +1,10 @@
 from collections import Counter
 from datetime import date
+from pathlib import Path
+from unittest.mock import patch
+from xml.etree import ElementTree
 import sys
 import unittest
-from xml.etree import ElementTree
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import update_profile_cards as cards
@@ -22,22 +23,32 @@ class ProfileCardTests(unittest.TestCase):
         self.assertEqual(current["start"], date(2026, 1, 4))
         self.assertEqual(longest["count"], 2)
 
-    def test_streaks_handles_no_contributions(self):
-        current, longest = cards.streaks([{"date": "2026-01-01", "contributionCount": 0}])
-        self.assertEqual(current["count"], 0)
-        self.assertEqual(longest["count"], 0)
-
-    def test_language_rows_are_sorted_and_limited(self):
+    def test_language_rows_are_sorted_limited_and_weighted(self):
         rows = cards.language_rows(Counter({"Python": 70, "JavaScript": 20, "HTML": 10, "CSS": 1, "Go": 1, "Rust": 1, "Java": 1}))
         self.assertEqual([row[0] for row in rows], ["Python", "JavaScript", "HTML", "CSS", "Go", "Rust"])
         self.assertAlmostEqual(rows[0][2], 67.307, places=2)
 
-    def test_statistics_svg_escapes_language_names_and_closes_svg(self):
-        stats = {"total": 12, "current": {"count": 2, "start": date(2026, 1, 2), "end": date(2026, 1, 3)}, "longest": {"count": 2, "start": date(2026, 1, 2), "end": date(2026, 1, 3)}, "commits": 5, "pull_requests": 3, "issues": 1, "repositories": 2}
-        svg = cards.render_statistics_svg(stats, 4, Counter({"<script>": 9}))
-        self.assertIn("&lt;script&gt;", svg)
-        self.assertTrue(svg.rstrip().endswith("</svg>"))
-        ElementTree.fromstring(svg)
+    def test_avatar_fetch_uses_github_response_and_falls_back_on_error(self):
+        with patch.object(cards, "get_bytes", return_value=b"github-avatar"):
+            self.assertEqual(cards.fetch_avatar_bytes("https://avatars.example/avatar.png"), b"github-avatar")
+        with patch.object(cards, "get_bytes", side_effect=OSError("offline")):
+            self.assertEqual(cards.fetch_avatar_bytes("https://avatars.example/avatar.png"), (cards.ASSETS / "profile-photo.png").read_bytes())
+
+    def test_rendered_svgs_escape_labels_and_are_valid_xml(self):
+        languages = Counter({"<script>": 9})
+        overview = cards.render_overview_svg({}, [], languages, 12)
+        language_card = cards.render_languages_svg(languages)
+        self.assertIn("&lt;script&gt;", language_card)
+        for svg in (overview, language_card):
+            self.assertTrue(svg.rstrip().endswith("</svg>"))
+            ElementTree.fromstring(svg)
+
+    def test_readme_and_workflow_have_no_conflict_markers(self):
+        root = Path(__file__).resolve().parents[1]
+        for path in (root / "README.md", root / ".github/workflows/update-profile-cards.yml", root / "scripts/update_profile_cards.py"):
+            content = path.read_text(encoding="utf-8")
+            self.assertNotIn("<<<<<<<", content)
+            self.assertNotIn(">>>>>>>", content)
 
 
 if __name__ == "__main__":

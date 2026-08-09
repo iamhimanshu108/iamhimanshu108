@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Install image renderer
+        run: python -m pip install --disable-pip-version-check Pillow
       - name: Fetch GitHub profile data
         env:
           GITHUB_USERNAME: iamhimanshu108
@@ -23,11 +25,7 @@ jobs:
         run: python scripts/update_profile_cards.py
       - name: Commit refreshed cards
         run: |
-<<<<<<< HEAD
-          git add assets/*.svg
-=======
-          git add assets/github-overview.svg assets/language-contributions.svg
->>>>>>> parent of 1d556e6 (update)
+          git add assets/profile-bio.gif assets/github-overview.svg assets/language-contributions.svg
           if git diff --cached --quiet; then
             echo "No profile card changes"
           else
