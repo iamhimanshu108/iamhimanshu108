@@ -23,7 +23,7 @@ jobs:
         run: python scripts/update_profile_cards.py
       - name: Commit refreshed cards
         run: |
-          git add assets/language-contributions.svg
+          git add assets/*.svg
           if git diff --cached --quiet; then
             echo "No profile card changes"
           else
