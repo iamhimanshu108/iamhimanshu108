@@ -3,7 +3,6 @@
 </p>
 
 <p align="center">
-  <img src="./assets/github-overview.svg" alt="Himanshu's GitHub overview" height="180" />
   <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" height="180" />
 </p>
 

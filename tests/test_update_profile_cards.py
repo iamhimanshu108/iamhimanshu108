@@ -56,14 +56,13 @@ class ProfileCardTests(unittest.TestCase):
 
     def test_rendered_svgs_escape_labels_and_are_valid_xml(self):
         languages = Counter({"<script>": 9})
-        overview = cards.render_overview_svg({}, [], languages, 12)
         activity = cards.render_activity_svg({"count": 4}, {"count": 12}, 365)
         language_card = cards.render_languages_svg(languages)
         self.assertIn("&lt;script&gt;", language_card)
         self.assertIn("CURRENT STREAK", activity)
         self.assertIn("LONGEST STREAK", activity)
         self.assertIn("CONTRIBUTIONS / 1 YEAR", activity)
-        for svg in (overview, activity, language_card):
+        for svg in (activity, language_card):
             self.assertTrue(svg.rstrip().endswith("</svg>"))
             ElementTree.fromstring(svg)
 

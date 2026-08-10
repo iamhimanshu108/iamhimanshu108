@@ -40,6 +40,19 @@ def get_bytes(url: str) -> bytes:
         return response.read()
 
 
+def load_mono_font(size: int) -> Any:
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return None
+    for name in ("DejaVuSansMono.ttf", "LiberationMono-Regular.ttf", "Courier_New.ttf", "Courier New.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
 def get_repositories() -> list[dict[str, Any]]:
     repositories: list[dict[str, Any]] = []
     page = 1
@@ -110,31 +123,27 @@ def get_contributions(history_from: datetime, now: datetime | None = None) -> di
     if not TOKEN:
         raise RuntimeError("GITHUB_TOKEN is required to generate contribution statistics.")
     now = now or datetime.now(timezone.utc)
+    year_from = now - timedelta(days=365)
     query = """
-      query ProfileContributions($login: String!, $yearFrom: DateTime!, $historyFrom: DateTime!, $to: DateTime!) {
+      query ProfileContributions($login: String!, $from: DateTime!, $to: DateTime!) {
         user(login: $login) {
-          lastYear: contributionsCollection(from: $yearFrom, to: $to) {
+          contributionsCollection(from: $from, to: $to) {
             totalCommitContributions totalPullRequestContributions totalIssueContributions
             totalRepositoriesWithContributedCommits
             contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } }
-          }
-          allTime: contributionsCollection(from: $historyFrom, to: $to) {
-            contributionCalendar { weeks { contributionDays { date contributionCount } } }
           }
         }
       }
     """
     result = get_json("https://api.github.com/graphql", {
         "query": query,
-        "variables": {"login": USERNAME, "yearFrom": (now - timedelta(days=365)).isoformat(),
-                      "historyFrom": history_from.isoformat(), "to": now.isoformat()},
+        "variables": {"login": USERNAME, "from": year_from.isoformat(), "to": now.isoformat()},
     })
     if result.get("errors"):
         raise RuntimeError(f"GitHub GraphQL error: {result['errors'][0]['message']}")
-    user = result["data"]["user"]
-    collection = user["lastYear"]
+    collection = result["data"]["user"]["contributionsCollection"]
     current, _ = streaks(flatten_days(collection["contributionCalendar"]), now.date())
-    _, longest = streaks(flatten_days(user["allTime"]["contributionCalendar"]))
+    _, longest = streaks(flatten_days(collection["contributionCalendar"]))
     return {
         "total": collection["contributionCalendar"]["totalContributions"], "current": current,
         "longest": longest, "commits": collection["totalCommitContributions"],
@@ -162,17 +171,7 @@ def svg_document(width: int, height: int, body: str, title: str) -> str:
 </svg>\n'''
 
 
-def render_overview_svg(user: dict[str, Any], repos: list[dict[str, Any]], languages: Counter[str], contributions: int) -> str:
-    values = [("YEAR CONTRIBUTIONS", contributions), ("TOTAL STARS", sum(repo.get("stargazers_count", 0) for repo in repos)),
-              ("LANGUAGES", len(languages))]
-    blocks: list[str] = ['<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ github --overview</text>']
-    for index, (label, value) in enumerate(values):
-        x = 38 + index * 250
-        if index:
-            blocks.append(f'<path d="M{x - 30} 42v126" stroke="#176b38"/>')
-        blocks.append(f'<text x="{x}" y="92" fill="#e5ffe9" font-family="monospace" font-size="35" font-weight="bold">{esc(value)}</text>')
-        blocks.append(f'<text x="{x}" y="126" fill="#00ff66" font-family="monospace" font-size="12">&gt; {label}</text>')
-    return svg_document(780, 180, ''.join(blocks), "Himanshu's GitHub overview")
+
 
 
 def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contributions: int) -> str:
@@ -183,9 +182,9 @@ def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contri
     for index, (label, value) in enumerate(values):
         x = 38 + index * 250
         if index:
-            blocks.append(f'<path d="M{x - 30} 42v126" stroke="#176b38"/>')
-        blocks.append(f'<text x="{x}" y="92" fill="#e5ffe9" font-family="monospace" font-size="35" font-weight="bold">{esc(value)}</text>')
-        blocks.append(f'<text x="{x}" y="126" fill="#00ff66" font-family="monospace" font-size="12">&gt; {label}</text>')
+            blocks.append(f'<path d="M{x - 30} 46v136" stroke="#176b38"/>')
+        blocks.append(f'<text x="{x}" y="100" fill="#e5ffe9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="46" font-weight="bold">{esc(value)}</text>')
+        blocks.append(f'<text x="{x}" y="150" fill="#00ff66" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="15">&gt; {label}</text>')
     return svg_document(780, 180, ''.join(blocks), "Himanshu's GitHub activity")
 
 
@@ -193,15 +192,15 @@ def render_languages_svg(languages: Counter[str]) -> str:
     rows: list[str] = ['<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ language --usage</text>']
     for index, (name, _amount, percent, color) in enumerate(language_rows(languages)):
         y, width = 62 + index * 25, 430 * percent / 100
-        rows.append(f'<circle cx="42" cy="{y - 5}" r="5" fill="{color}"/><text x="57" y="{y}" fill="#c8ffd9" font-family="monospace" font-size="13">{esc(name)}</text>')
-        rows.append(f'<rect x="215" y="{y - 12}" width="430" height="10" rx="5" fill="#0d3d21"/><rect x="215" y="{y - 12}" width="{width:.1f}" height="10" rx="5" fill="{color}"/>')
-        rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="monospace" font-size="13">{percent:.2f}%</text>')
-    return svg_document(780, 210, ''.join(rows), "Himanshu's language contribution percentages")
+        rows.append(f'<circle cx="42" cy="{y - 5}" r="5" fill="{color}"/><text x="57" y="{y}" fill="#c8ffd9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="15">{esc(name)}</text>')
+        rows.append(f'<rect x="215" y="{y - 14}" width="430" height="12" rx="6" fill="#0d3d21"/><rect x="215" y="{y - 14}" width="{width:.1f}" height="12" rx="6" fill="{color}"/>')
+        rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="14">{percent:.2f}%</text>')
+    return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:
     try:
-        from PIL import Image, ImageDraw, ImageOps
+        from PIL import Image, ImageDraw, ImageFont, ImageOps
     except ImportError as error:
         raise RuntimeError("Pillow is required to render profile-bio.gif. Install it with pip install Pillow.") from error
 
@@ -210,6 +209,7 @@ def render_profile_gif(avatar: bytes, output: Path) -> None:
     mask = Image.new("L", (180, 180), 0)
     ImageDraw.Draw(mask).ellipse((0, 0, 179, 179), fill=255)
     frames = []
+    font = load_mono_font(20)
     code_lines = ("01001110 01000101 01010100 01010010 01010101 01001110", "sudo access --profile himanshu", "[OK] neural backend online", "encrypt://build.learn.repeat", "0x108 0xff 0x7a 0x01 0x00")
     for index, scan_y in enumerate((72, 108, 144, 180, 216, 252, 288, 324)):
         frame = Image.new("RGB", (960, 360), "#020804")
@@ -219,15 +219,31 @@ def render_profile_gif(avatar: bytes, output: Path) -> None:
         draw.line((10, 49, 950, 49), fill="#1e5e38", width=1)
         for x, color in ((32, "#ff5f56"), (54, "#ffbd2e"), (76, "#27c93f")):
             draw.ellipse((x - 6, 26 - 6, x + 6, 26 + 6), fill=color)
-        draw.text((112, 20), "root@iamhimanshu:~$ ./identity --live", fill="#4dff91")
+        font = load_mono_font(18) or None
+        draw.text((112, 20), "root@iamanshu:~$ ./identity --live", fill="#4dff91", font=font)
 
         # Low-contrast code stream gives the card a terminal/CRT feel without hiding the content.
         for row, text in enumerate(code_lines):
-            draw.text((30, 66 + row * 18), text, fill="#0d4d29")
-            draw.text((720, 110 + row * 20), text[:25], fill="#0a3c20")
+            draw.text((30, 66 + row * 18), text, fill="#0d4d29", font=font)
+            draw.text((720, 110 + row * 20), text[:25], fill="#0a3c20", font=font)
         draw.line((20, scan_y, 940, scan_y), fill="#0b6b37", width=1)
 
         draw.rectangle((45, 88, 255, 302), outline="#26ff74", width=2)
+        draw.line((45, 108, 65, 88), fill="#26ff74", width=3)
+        draw.line((235, 88, 255, 108), fill="#26ff74", width=3)
+        draw.line((45, 282, 65, 302), fill="#26ff74", width=3)
+        draw.line((235, 302, 255, 282), fill="#26ff74", width=3)
+        frame.paste(source, (60, 105), mask)
+        draw.ellipse((60, 105, 240, 285), outline="#00ff66", width=2)
+        draw.line((70, 105 + ((index * 19) % 170), 230, 105 + ((index * 19) % 170)), fill="#77ffb0", width=2)
+        draw.text((70, 315), "[ AVATAR VERIFIED ]", fill="#2cff78", font=font)
+
+        terminal_lines = [("root@iamanshu:~$ whoami", "#4dff91"), ("Himanshu Kumar Yadav", "#e5e5e9"),
+                          ("root@iamanshu:~$ role --current", "#4dff91"), ("MERN | Python | Gen AI | FastAPI Developer", "#e5e5e9"),
+                          ("root@iamanshu:~$ focus", "#4dff91"), ("AI-powered backend development", "#e5e5e9"),
+                          ("root@iamanshu:~$ stack", "#4dff91"), ("MongoDB / Express / React / Node / FastAPI", "#e5e5e9")]
+        for row, (text, color) in enumerate(terminal_lines):
+            draw.text((290, 78 + row * 27), text, fill=color, font=font)
         draw.line((45, 108, 65, 88), fill="#26ff74", width=3)
         draw.line((235, 88, 255, 108), fill="#26ff74", width=3)
         draw.line((45, 282, 65, 302), fill="#26ff74", width=3)
@@ -260,7 +276,6 @@ def main() -> None:
     created_at = datetime.fromisoformat(user["created_at"].replace("Z", "+00:00"))
     stats = get_contributions(created_at)
     render_profile_gif(fetch_avatar_bytes(user.get("avatar_url")), ASSETS / "profile-bio.gif")
-    (ASSETS / "github-overview.svg").write_text(render_overview_svg(user, repositories, languages, stats["total"]), encoding="utf-8")
     (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
 
