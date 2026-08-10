@@ -25,6 +25,7 @@ if TOKEN:
     HEADERS["Authorization"] = f"Bearer {TOKEN}"
 
 PALETTE = ("#00ff66", "#45ff8f", "#b6ff00", "#00d96f", "#7cffb2", "#c8ffd9")
+SVG_MONO_FONT = "Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace"
 
 
 def get_json(url: str, payload: dict[str, Any] | None = None) -> Any:
@@ -45,7 +46,8 @@ def load_mono_font(size: int) -> Any:
         from PIL import ImageFont
     except ImportError:
         return None
-    for name in ("DejaVuSansMono.ttf", "LiberationMono-Regular.ttf", "Courier_New.ttf", "Courier New.ttf"):
+    for name in ("C:/Windows/Fonts/consola.ttf", "C:/Windows/Fonts/cour.ttf", "DejaVuSansMono.ttf",
+                 "LiberationMono-Regular.ttf", "Courier_New.ttf", "Courier New.ttf"):
         try:
             return ImageFont.truetype(name, size)
         except OSError:
@@ -183,8 +185,8 @@ def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contri
         x = 38 + index * 250
         if index:
             blocks.append(f'<path d="M{x - 30} 46v136" stroke="#176b38"/>')
-        blocks.append(f'<text x="{x}" y="100" fill="#e5ffe9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="46" font-weight="bold">{esc(value)}</text>')
-        blocks.append(f'<text x="{x}" y="150" fill="#00ff66" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="15">&gt; {label}</text>')
+        blocks.append(f'<text x="{x}" y="100" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="46" font-weight="bold">{esc(value)}</text>')
+        blocks.append(f'<text x="{x}" y="150" fill="#00ff66" font-family="{SVG_MONO_FONT}" font-size="15">&gt; {label}</text>')
     return svg_document(780, 180, ''.join(blocks), "Himanshu's GitHub activity")
 
 
@@ -192,9 +194,9 @@ def render_languages_svg(languages: Counter[str]) -> str:
     rows: list[str] = ['<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ language --usage</text>']
     for index, (name, _amount, percent, color) in enumerate(language_rows(languages)):
         y, width = 62 + index * 25, 430 * percent / 100
-        rows.append(f'<circle cx="42" cy="{y - 5}" r="5" fill="{color}"/><text x="57" y="{y}" fill="#c8ffd9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="15">{esc(name)}</text>')
+        rows.append(f'<circle cx="42" cy="{y - 5}" r="5" fill="{color}"/><text x="57" y="{y}" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="15">{esc(name)}</text>')
         rows.append(f'<rect x="215" y="{y - 14}" width="430" height="12" rx="6" fill="#0d3d21"/><rect x="215" y="{y - 14}" width="{width:.1f}" height="12" rx="6" fill="{color}"/>')
-        rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", monospace" font-size="14">{percent:.2f}%</text>')
+        rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="14">{percent:.2f}%</text>')
     return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
 
 
@@ -209,24 +211,24 @@ def render_profile_gif(avatar: bytes, output: Path) -> None:
     mask = Image.new("L", (180, 180), 0)
     ImageDraw.Draw(mask).ellipse((0, 0, 179, 179), fill=255)
     frames = []
-    font = load_mono_font(20)
+    header_font = load_mono_font(14)
+    body_font = load_mono_font(15)
+    label_font = load_mono_font(14)
     code_lines = ("01001110 01000101 01010100 01010010 01010101 01001110", "sudo access --profile himanshu", "[OK] neural backend online", "encrypt://build.learn.repeat", "0x108 0xff 0x7a 0x01 0x00")
     for index, scan_y in enumerate((72, 108, 144, 180, 216, 252, 288, 324)):
-        frame = Image.new("RGB", (960, 360), "#020804")
+        frame = Image.new("RGB", (1200, 420), "#020804")
         draw = ImageDraw.Draw(frame)
-        draw.rounded_rectangle((8, 8, 952, 352), radius=10, fill="#030d07", outline="#00ff66", width=2)
-        draw.rectangle((10, 10, 950, 48), fill="#06160b")
-        draw.line((10, 49, 950, 49), fill="#1e5e38", width=1)
+        draw.rounded_rectangle((8, 8, 1192, 412), radius=10, fill="#030d07", outline="#00ff66", width=2)
+        draw.rectangle((10, 10, 1190, 58), fill="#06160b")
+        draw.line((10, 59, 1190, 59), fill="#1e5e38", width=1)
         for x, color in ((32, "#ff5f56"), (54, "#ffbd2e"), (76, "#27c93f")):
             draw.ellipse((x - 6, 26 - 6, x + 6, 26 + 6), fill=color)
-        font = load_mono_font(18) or None
-        draw.text((112, 20), "root@iamanshu:~$ ./identity --live", fill="#4dff91", font=font)
+        draw.text((112, 17), "root@iamhimanshu:~$ ./identity --live", fill="#4dff91", font=header_font)
 
         # Low-contrast code stream gives the card a terminal/CRT feel without hiding the content.
         for row, text in enumerate(code_lines):
-            draw.text((30, 66 + row * 18), text, fill="#0d4d29", font=font)
-            draw.text((720, 110 + row * 20), text[:25], fill="#0a3c20", font=font)
-        draw.line((20, scan_y, 940, scan_y), fill="#0b6b37", width=1)
+            draw.text((30, 76 + row * 25), text, fill="#062816", font=label_font)
+            draw.text((900, 135 + row * 30), text[:25], fill="#041c0d", font=label_font)
 
         draw.rectangle((45, 88, 255, 302), outline="#26ff74", width=2)
         draw.line((45, 108, 65, 88), fill="#26ff74", width=3)
@@ -234,34 +236,28 @@ def render_profile_gif(avatar: bytes, output: Path) -> None:
         draw.line((45, 282, 65, 302), fill="#26ff74", width=3)
         draw.line((235, 302, 255, 282), fill="#26ff74", width=3)
         frame.paste(source, (60, 105), mask)
+        # The animated matrix layer is deliberately clipped to the avatar, keeping the rest of the card still and readable.
+        matrix = Image.new("RGBA", (180, 180), (0, 0, 0, 0))
+        matrix_draw = ImageDraw.Draw(matrix)
+        for y in range(14, 170, 26):
+            for x in range(12, 170, 22):
+                if (x - 90) ** 2 + (y - 90) ** 2 < 72 ** 2:
+                    character = "01"[(x // 22 + y // 26 + index) % 2]
+                    matrix_draw.text((x, y), character, fill=(0, 255, 102, 68), font=label_font)
+        frame.paste(matrix, (60, 105), matrix)
         draw.ellipse((60, 105, 240, 285), outline="#00ff66", width=2)
         draw.line((70, 105 + ((index * 19) % 170), 230, 105 + ((index * 19) % 170)), fill="#77ffb0", width=2)
-        draw.text((70, 315), "[ AVATAR VERIFIED ]", fill="#2cff78", font=font)
+        draw.text((70, 315), "[ AVATAR VERIFIED ]", fill="#2cff78", font=label_font)
 
-        terminal_lines = [("root@iamanshu:~$ whoami", "#4dff91"), ("Himanshu Kumar Yadav", "#e5e5e9"),
-                          ("root@iamanshu:~$ role --current", "#4dff91"), ("MERN | Python | Gen AI | FastAPI Developer", "#e5e5e9"),
-                          ("root@iamanshu:~$ focus", "#4dff91"), ("AI-powered backend development", "#e5e5e9"),
-                          ("root@iamanshu:~$ stack", "#4dff91"), ("MongoDB / Express / React / Node / FastAPI", "#e5e5e9")]
+        terminal_lines = [("> WHOAMI: Himanshu Kumar Yadav", "#e5ffe9"),
+                          ("> ROLE: MERN | Python | Gen AI | FastAPI", "#e5ffe9"),
+                          ("> FOCUS: AI-powered backend development", "#e5ffe9"),
+                          ("> STACK: MongoDB | Express | React | Node | FastAPI", "#e5ffe9")]
         for row, (text, color) in enumerate(terminal_lines):
-            draw.text((290, 78 + row * 27), text, fill=color, font=font)
-        draw.line((45, 108, 65, 88), fill="#26ff74", width=3)
-        draw.line((235, 88, 255, 108), fill="#26ff74", width=3)
-        draw.line((45, 282, 65, 302), fill="#26ff74", width=3)
-        draw.line((235, 302, 255, 282), fill="#26ff74", width=3)
-        frame.paste(source, (60, 105), mask)
-        draw.ellipse((60, 105, 240, 285), outline="#00ff66", width=2)
-        draw.line((70, 105 + ((index * 19) % 170), 230, 105 + ((index * 19) % 170)), fill="#77ffb0", width=2)
-        draw.text((70, 315), "[ AVATAR VERIFIED ]", fill="#2cff78")
-
-        terminal_lines = [("root@iamhimanshu:~$ whoami", "#4dff91"), ("Himanshu Kumar Yadav", "#e5ffe9"),
-                          ("root@iamhimanshu:~$ role --current", "#4dff91"), ("MERN | Python | Gen AI | FastAPI Developer", "#e5ffe9"),
-                          ("root@iamhimanshu:~$ focus", "#4dff91"), ("AI-powered backend development", "#e5ffe9"),
-                          ("root@iamhimanshu:~$ stack", "#4dff91"), ("MongoDB / Express / React / Node / FastAPI", "#e5ffe9")]
-        for row, (text, color) in enumerate(terminal_lines):
-            draw.text((290, 78 + row * 27), text, fill=color)
+            draw.text((290, 88 + row * 46), text, fill=color, font=body_font)
         cursor = "█" if index % 2 == 0 else " "
-        draw.text((290, 304), f"root@iamhimanshu:~$ connect --now {cursor}", fill="#4dff91")
-        draw.text((290, 328), "STATUS: ONLINE  |  LOCATION: INDIA  |  BUILDING IN PUBLIC", fill="#2b9e55")
+        draw.text((290, 300), f"root@iamhimanshu:~$ connect --now {cursor}", fill="#4dff91", font=label_font)
+        draw.text((290, 332), "STATUS: ONLINE  |  LOCATION: INDIA  |  BUILDING IN PUBLIC", fill="#2b9e55", font=label_font)
         frames.append(frame)
     frames[0].save(output, save_all=True, append_images=frames[1:], duration=180, loop=0, optimize=True)
 
