@@ -9,7 +9,3 @@
 <p align="center">
   <img src="./assets/github-activity.svg" alt="Himanshu's GitHub activity statistics" height="180" />
 </p>
-
-<p align="center">
-  <img src="./assets/contribution-graph.svg" alt="Himanshu's contribution activity graph" width="100%" />
-</p>

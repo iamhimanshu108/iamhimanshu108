@@ -144,15 +144,13 @@ def get_contributions(history_from: datetime, now: datetime | None = None) -> di
     if result.get("errors"):
         raise RuntimeError(f"GitHub GraphQL error: {result['errors'][0]['message']}")
     collection = result["data"]["user"]["contributionsCollection"]
-    calendar = collection["contributionCalendar"]
-    current, _ = streaks(flatten_days(calendar), now.date())
-    _, longest = streaks(flatten_days(calendar))
+    current, _ = streaks(flatten_days(collection["contributionCalendar"]), now.date())
+    _, longest = streaks(flatten_days(collection["contributionCalendar"]))
     return {
-        "total": calendar["totalContributions"], "current": current,
+        "total": collection["contributionCalendar"]["totalContributions"], "current": current,
         "longest": longest, "commits": collection["totalCommitContributions"],
         "pull_requests": collection["totalPullRequestContributions"], "issues": collection["totalIssueContributions"],
         "repositories": collection["totalRepositoriesWithContributedCommits"],
-        "weeks": calendar.get("weeks", []),
     }
 
 
@@ -197,105 +195,6 @@ def render_languages_svg(languages: Counter[str]) -> str:
         rows.append(f'<rect x="215" y="{y - 14}" width="430" height="12" rx="6" fill="#0d3d21"/><rect x="215" y="{y - 14}" width="{width:.1f}" height="12" rx="6" fill="{color}"/>')
         rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="14">{percent:.2f}%</text>')
     return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
-
-
-def last_30_days_contributions(weeks: list[dict[str, Any]]) -> list[tuple[date, int]]:
-    days: list[tuple[date, int]] = []
-    for week in weeks:
-        for day in week.get("contributionDays", []):
-            if "date" in day:
-                try:
-                    dt = date.fromisoformat(day["date"])
-                    count = int(day.get("contributionCount", 0))
-                    days.append((dt, count))
-                except Exception:
-                    pass
-    days.sort(key=lambda x: x[0])
-    if len(days) > 30:
-        days = days[-30:]
-    if not days:
-        today = date.today()
-        days = [(today - timedelta(days=29 - i), 0) for i in range(30)]
-    return days
-
-
-def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
-    days = last_30_days_contributions(weeks)
-    counts = [c for _, c in days]
-    max_count = max(max(counts), 1)
-
-    margin = 40.0
-    total_w = 780.0
-    slot_w = (total_w - 2 * margin) / len(days)
-    bar_w = 14.0
-    baseline = 158.0
-    max_h = 86.0
-
-    elements: list[str] = [
-        '<defs>',
-        '  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">',
-        '    <stop offset="0%" stop-color="#b6ff00"/>',
-        '    <stop offset="35%" stop-color="#00ff66"/>',
-        '    <stop offset="100%" stop-color="#008f44"/>',
-        '  </linearGradient>',
-        '  <linearGradient id="lineTrend" x1="0" y1="0" x2="1" y2="0">',
-        '    <stop offset="0%" stop-color="#00ff66"/>',
-        '    <stop offset="50%" stop-color="#45ff8f"/>',
-        '    <stop offset="100%" stop-color="#b6ff00"/>',
-        '  </linearGradient>',
-        '</defs>',
-        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --last-30-days</text>',
-        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">LAST 30 DAYS</text>',
-        # Grid lines
-        '<line x1="40" y1="72" x2="740" y2="72" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
-        '<line x1="40" y1="115" x2="740" y2="115" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
-        '<line x1="40" y1="158" x2="740" y2="158" stroke="#176b38" stroke-width="1"/>',
-    ]
-
-    points: list[tuple[float, float]] = []
-
-    for i, (dt, count) in enumerate(days):
-        center_x = margin + (i + 0.5) * slot_w
-        bar_x = center_x - bar_w / 2.0
-        bar_h = (count / max_count) * max_h if count > 0 else 0
-        bar_y = baseline - bar_h
-
-        # Track background
-        elements.append(f'<rect x="{bar_x:.1f}" y="72" width="{bar_w}" height="86" rx="4" fill="#04180c" stroke="#0d3d21" stroke-width="1"/>')
-
-        if count > 0:
-            elements.append(f'<rect x="{bar_x:.1f}" y="{bar_y:.1f}" width="{bar_w}" height="{bar_h:.1f}" rx="4" fill="url(#barGradient)"/>')
-            elements.append(f'<text x="{center_x:.1f}" y="{bar_y - 5:.1f}" text-anchor="middle" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="10" font-weight="bold">{count}</text>')
-            points.append((center_x, bar_y))
-        else:
-            points.append((center_x, baseline))
-
-        # Date labels at spaced intervals (every 5 days and last day)
-        if i % 5 == 0 or i == len(days) - 1:
-            elements.append(f'<text x="{center_x:.1f}" y="185" text-anchor="middle" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="11">{dt.strftime("%b %d")}</text>')
-        else:
-            elements.append(f'<circle cx="{center_x:.1f}" cy="180" r="1.5" fill="#176b38"/>')
-
-    # Trend line overlay
-    if len(points) >= 2:
-        path_d: list[str] = [f"M {points[0][0]:.1f},{points[0][1]:.1f}"]
-        for i in range(len(points) - 1):
-            p0 = points[i - 1] if i > 0 else points[i]
-            p1 = points[i]
-            p2 = points[i + 1]
-            p3 = points[i + 2] if i + 2 < len(points) else p2
-            cp1x = p1[0] + (p2[0] - p0[0]) / 6.0
-            cp1y = p1[1] + (p2[1] - p0[1]) / 6.0
-            cp2x = p2[0] - (p3[0] - p1[0]) / 6.0
-            cp2y = p2[1] - (p3[1] - p1[1]) / 6.0
-            path_d.append(f"C {cp1x:.1f},{cp1y:.1f} {cp2x:.1f},{cp2y:.1f} {p2[0]:.1f},{p2[1]:.1f}")
-        elements.append(f'<path d="{" ".join(path_d)}" fill="none" stroke="url(#lineTrend)" stroke-width="2" stroke-dasharray="3,3"/>')
-
-    for pt_x, pt_y in points:
-        if pt_y < baseline:
-            elements.append(f'<circle cx="{pt_x:.1f}" cy="{pt_y:.1f}" r="3" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
-
-    return svg_document(780, 210, ''.join(elements), "Himanshu's 30-day contribution graph")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:
@@ -372,7 +271,6 @@ def main() -> None:
     render_profile_gif(fetch_avatar_bytes(user.get("avatar_url")), ASSETS / "profile-bio.gif")
     (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
-    (ASSETS / "contribution-graph.svg").write_text(render_contribution_graph_svg(stats.get("weeks", [])), encoding="utf-8")
 
 
 if __name__ == "__main__":

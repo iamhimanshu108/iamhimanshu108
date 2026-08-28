@@ -58,17 +58,11 @@ class ProfileCardTests(unittest.TestCase):
         languages = Counter({"<script>": 9})
         activity = cards.render_activity_svg({"count": 4}, {"count": 12}, 365)
         language_card = cards.render_languages_svg(languages)
-        sample_weeks = [
-            {"contributionDays": [{"date": f"2026-01-{(i%28)+1:02d}", "contributionCount": i % 5} for i in range(7)]}
-            for _ in range(52)
-        ]
-        contribution_graph = cards.render_contribution_graph_svg(sample_weeks)
         self.assertIn("&lt;script&gt;", language_card)
         self.assertIn("CURRENT STREAK", activity)
         self.assertIn("LONGEST STREAK", activity)
         self.assertIn("CONTRIBUTIONS / 1 YEAR", activity)
-        self.assertIn("contribution --last-30-days", contribution_graph)
-        for svg in (activity, language_card, contribution_graph):
+        for svg in (activity, language_card):
             self.assertTrue(svg.rstrip().endswith("</svg>"))
             ElementTree.fromstring(svg)
 
