@@ -144,13 +144,15 @@ def get_contributions(history_from: datetime, now: datetime | None = None) -> di
     if result.get("errors"):
         raise RuntimeError(f"GitHub GraphQL error: {result['errors'][0]['message']}")
     collection = result["data"]["user"]["contributionsCollection"]
-    current, _ = streaks(flatten_days(collection["contributionCalendar"]), now.date())
-    _, longest = streaks(flatten_days(collection["contributionCalendar"]))
+    calendar = collection["contributionCalendar"]
+    current, _ = streaks(flatten_days(calendar), now.date())
+    _, longest = streaks(flatten_days(calendar))
     return {
-        "total": collection["contributionCalendar"]["totalContributions"], "current": current,
+        "total": calendar["totalContributions"], "current": current,
         "longest": longest, "commits": collection["totalCommitContributions"],
         "pull_requests": collection["totalPullRequestContributions"], "issues": collection["totalIssueContributions"],
         "repositories": collection["totalRepositoriesWithContributedCommits"],
+        "weeks": calendar.get("weeks", []),
     }
 
 
@@ -171,9 +173,6 @@ def svg_document(width: int, height: int, body: str, title: str) -> str:
   <rect x="1" y="1" width="{width - 2}" height="{height - 2}" rx="15" fill="none" stroke="#00ff66" stroke-width="2"/>
   {body}
 </svg>\n'''
-
-
-
 
 
 def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contributions: int) -> str:
@@ -198,6 +197,88 @@ def render_languages_svg(languages: Counter[str]) -> str:
         rows.append(f'<rect x="215" y="{y - 14}" width="430" height="12" rx="6" fill="#0d3d21"/><rect x="215" y="{y - 14}" width="{width:.1f}" height="12" rx="6" fill="{color}"/>')
         rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="14">{percent:.2f}%</text>')
     return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
+
+
+def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
+    if not weeks:
+        weeks = [{"contributionDays": [{"date": "2026-01-01", "contributionCount": 0}]}]
+
+    counts = [sum(int(d.get("contributionCount", 0)) for d in w.get("contributionDays", [])) for w in weeks]
+    max_count = max(max(counts), 1)
+
+    left, right, top, bottom = 45.0, 735.0, 58.0, 160.0
+    width = right - left
+    height = bottom - top
+    n = max(len(weeks), 2)
+
+    points: list[tuple[float, float]] = []
+    for i, count in enumerate(counts):
+        x = left + (i / (n - 1)) * width
+        y = bottom - (count / max_count) * (height - 10)
+        points.append((x, y))
+
+    # Construct smooth cubic bezier path
+    path_d: list[str] = [f"M {points[0][0]:.1f},{points[0][1]:.1f}"]
+    for i in range(len(points) - 1):
+        p0 = points[i - 1] if i > 0 else points[i]
+        p1 = points[i]
+        p2 = points[i + 1]
+        p3 = points[i + 2] if i + 2 < len(points) else p2
+        cp1x = p1[0] + (p2[0] - p0[0]) / 6.0
+        cp1y = p1[1] + (p2[1] - p0[1]) / 6.0
+        cp2x = p2[0] - (p3[0] - p1[0]) / 6.0
+        cp2y = p2[1] - (p3[1] - p1[1]) / 6.0
+        path_d.append(f"C {cp1x:.1f},{cp1y:.1f} {cp2x:.1f},{cp2y:.1f} {p2[0]:.1f},{p2[1]:.1f}")
+
+    smooth_line = " ".join(path_d)
+    area_path = f"{smooth_line} L {points[-1][0]:.1f},{bottom:.1f} L {points[0][0]:.1f},{bottom:.1f} Z"
+
+    # Grid and Month Labels
+    elements: list[str] = [
+        '<defs>',
+        '  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">',
+        '    <stop offset="0%" stop-color="#00d96f" stop-opacity="0.45"/>',
+        '    <stop offset="100%" stop-color="#00d96f" stop-opacity="0.0"/>',
+        '  </linearGradient>',
+        '  <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">',
+        '    <stop offset="0%" stop-color="#00ff66"/>',
+        '    <stop offset="50%" stop-color="#45ff8f"/>',
+        '    <stop offset="100%" stop-color="#b6ff00"/>',
+        '  </linearGradient>',
+        '</defs>',
+        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --graph</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">ANNUAL ACTIVITY</text>',
+    ]
+
+    # Gridlines
+    for grid_y in (top, top + height * 0.33, top + height * 0.66, bottom):
+        elements.append(f'<line x1="{left}" y1="{grid_y:.1f}" x2="{right}" y2="{grid_y:.1f}" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>')
+
+    # Shaded Area and Line Curve
+    elements.append(f'<path d="{area_path}" fill="url(#areaGradient)"/>')
+    elements.append(f'<path d="{smooth_line}" fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round"/>')
+
+    # Highlight peaks with glowing points
+    for idx, (x, y) in enumerate(points):
+        if counts[idx] > 0 and (idx == 0 or counts[idx] >= counts[idx - 1]) and (idx == len(counts) - 1 or counts[idx] >= counts[idx + 1]):
+            elements.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
+
+    # Month Labels along bottom
+    months_seen = set()
+    for i, week in enumerate(weeks):
+        days = week.get("contributionDays", [])
+        if days:
+            try:
+                dt = date.fromisoformat(days[0]["date"])
+                month_key = (dt.year, dt.month)
+                if month_key not in months_seen:
+                    months_seen.add(month_key)
+                    x = left + (i / (n - 1)) * width
+                    elements.append(f'<text x="{x:.1f}" y="185" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="11">{dt.strftime("%b")}</text>')
+            except Exception:
+                continue
+
+    return svg_document(780, 205, ''.join(elements), "Himanshu's contribution graph")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:
@@ -274,6 +355,7 @@ def main() -> None:
     render_profile_gif(fetch_avatar_bytes(user.get("avatar_url")), ASSETS / "profile-bio.gif")
     (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
+    (ASSETS / "contribution-graph.svg").write_text(render_contribution_graph_svg(stats.get("weeks", [])), encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -11,5 +11,5 @@
 </p>
 
 <p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=iamhimanshu108&bg_color=020804&color=C8FFD9&line=00FF66&point=B6FF00&area=true&area_color=00D96F&hide_border=true" alt="Himanshu's contribution activity graph" width="100%" />
+  <img src="./assets/contribution-graph.svg" alt="Himanshu's contribution activity graph" width="100%" />
 </p>
