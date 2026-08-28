@@ -199,34 +199,35 @@ def render_languages_svg(languages: Counter[str]) -> str:
     return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
 
 
-def monthly_contributions(weeks: list[dict[str, Any]]) -> list[tuple[str, int]]:
-    months_map: dict[tuple[int, int], int] = {}
+def last_30_days_contributions(weeks: list[dict[str, Any]]) -> list[tuple[date, int]]:
+    days: list[tuple[date, int]] = []
     for week in weeks:
         for day in week.get("contributionDays", []):
             if "date" in day:
                 try:
                     dt = date.fromisoformat(day["date"])
-                    key = (dt.year, dt.month)
-                    months_map[key] = months_map.get(key, 0) + int(day.get("contributionCount", 0))
+                    count = int(day.get("contributionCount", 0))
+                    days.append((dt, count))
                 except Exception:
                     pass
-    sorted_keys = sorted(months_map.keys())
-    if len(sorted_keys) > 12:
-        sorted_keys = sorted_keys[-12:]
-    if not sorted_keys:
-        return [(date(2026, m, 1).strftime("%b"), 0) for m in range(1, 13)]
-    return [(date(y, m, 1).strftime("%b"), months_map[(y, m)]) for y, m in sorted_keys]
+    days.sort(key=lambda x: x[0])
+    if len(days) > 30:
+        days = days[-30:]
+    if not days:
+        today = date.today()
+        days = [(today - timedelta(days=29 - i), 0) for i in range(30)]
+    return days
 
 
 def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
-    months = monthly_contributions(weeks)
-    counts = [c for _, c in months]
+    days = last_30_days_contributions(weeks)
+    counts = [c for _, c in days]
     max_count = max(max(counts), 1)
 
-    margin = 44.0
+    margin = 40.0
     total_w = 780.0
-    slot_w = (total_w - 2 * margin) / len(months)
-    bar_w = 32.0
+    slot_w = (total_w - 2 * margin) / len(days)
+    bar_w = 14.0
     baseline = 158.0
     max_h = 86.0
 
@@ -243,35 +244,37 @@ def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
         '    <stop offset="100%" stop-color="#b6ff00"/>',
         '  </linearGradient>',
         '</defs>',
-        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --monthly</text>',
-        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">12-MONTH ACTIVITY</text>',
+        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --last-30-days</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">LAST 30 DAYS</text>',
         # Grid lines
-        '<line x1="44" y1="72" x2="736" y2="72" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
-        '<line x1="44" y1="115" x2="736" y2="115" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
-        '<line x1="44" y1="158" x2="736" y2="158" stroke="#176b38" stroke-width="1"/>',
+        '<line x1="40" y1="72" x2="740" y2="72" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
+        '<line x1="40" y1="115" x2="740" y2="115" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
+        '<line x1="40" y1="158" x2="740" y2="158" stroke="#176b38" stroke-width="1"/>',
     ]
 
     points: list[tuple[float, float]] = []
 
-    for i, (name, count) in enumerate(months):
+    for i, (dt, count) in enumerate(days):
         center_x = margin + (i + 0.5) * slot_w
         bar_x = center_x - bar_w / 2.0
         bar_h = (count / max_count) * max_h if count > 0 else 0
         bar_y = baseline - bar_h
 
         # Track background
-        elements.append(f'<rect x="{bar_x:.1f}" y="72" width="{bar_w}" height="86" rx="6" fill="#04180c" stroke="#0d3d21" stroke-width="1"/>')
+        elements.append(f'<rect x="{bar_x:.1f}" y="72" width="{bar_w}" height="86" rx="4" fill="#04180c" stroke="#0d3d21" stroke-width="1"/>')
 
         if count > 0:
-            elements.append(f'<rect x="{bar_x:.1f}" y="{bar_y:.1f}" width="{bar_w}" height="{bar_h:.1f}" rx="6" fill="url(#barGradient)"/>')
-            elements.append(f'<text x="{center_x:.1f}" y="{bar_y - 6:.1f}" text-anchor="middle" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="11" font-weight="bold">{count}</text>')
+            elements.append(f'<rect x="{bar_x:.1f}" y="{bar_y:.1f}" width="{bar_w}" height="{bar_h:.1f}" rx="4" fill="url(#barGradient)"/>')
+            elements.append(f'<text x="{center_x:.1f}" y="{bar_y - 5:.1f}" text-anchor="middle" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="10" font-weight="bold">{count}</text>')
             points.append((center_x, bar_y))
         else:
-            elements.append(f'<text x="{center_x:.1f}" y="148" text-anchor="middle" fill="#1b5e36" font-family="{SVG_MONO_FONT}" font-size="11">0</text>')
             points.append((center_x, baseline))
 
-        # Month label below
-        elements.append(f'<text x="{center_x:.1f}" y="185" text-anchor="middle" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="12" font-weight="bold">{esc(name)}</text>')
+        # Date labels at spaced intervals (every 5 days and last day)
+        if i % 5 == 0 or i == len(days) - 1:
+            elements.append(f'<text x="{center_x:.1f}" y="185" text-anchor="middle" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="11">{dt.strftime("%b %d")}</text>')
+        else:
+            elements.append(f'<circle cx="{center_x:.1f}" cy="180" r="1.5" fill="#176b38"/>')
 
     # Trend line overlay
     if len(points) >= 2:
@@ -289,9 +292,10 @@ def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
         elements.append(f'<path d="{" ".join(path_d)}" fill="none" stroke="url(#lineTrend)" stroke-width="2" stroke-dasharray="3,3"/>')
 
     for pt_x, pt_y in points:
-        elements.append(f'<circle cx="{pt_x:.1f}" cy="{pt_y:.1f}" r="3.5" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
+        if pt_y < baseline:
+            elements.append(f'<circle cx="{pt_x:.1f}" cy="{pt_y:.1f}" r="3" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
 
-    return svg_document(780, 210, ''.join(elements), "Himanshu's monthly contribution graph")
+    return svg_document(780, 210, ''.join(elements), "Himanshu's 30-day contribution graph")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:
