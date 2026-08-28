@@ -188,13 +188,34 @@ def render_activity_svg(current: dict[str, Any], longest: dict[str, Any], contri
 
 
 def render_languages_svg(languages: Counter[str]) -> str:
-    rows: list[str] = ['<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ language --usage</text>']
+    rows: list[str] = [
+        '<defs>',
+        '  <linearGradient id="langTrack" x1="0" y1="0" x2="1" y2="0">',
+        '    <stop offset="0%" stop-color="#04180c"/>',
+        '    <stop offset="100%" stop-color="#062211"/>',
+        '  </linearGradient>',
+        '</defs>',
+        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ language --usage</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">MOST USED</text>',
+    ]
+
     for index, (name, _amount, percent, color) in enumerate(language_rows(languages)):
-        y, width = 62 + index * 25, 430 * percent / 100
-        rows.append(f'<circle cx="42" cy="{y - 5}" r="5" fill="{color}"/><text x="57" y="{y}" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="15">{esc(name)}</text>')
-        rows.append(f'<rect x="215" y="{y - 14}" width="430" height="12" rx="6" fill="#0d3d21"/><rect x="215" y="{y - 14}" width="{width:.1f}" height="12" rx="6" fill="{color}"/>')
-        rows.append(f'<text x="730" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="14">{percent:.2f}%</text>')
-    return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
+        y = 66 + index * 24
+        bar_y = y - 11
+        bar_width = max(450 * percent / 100, 3.0)
+
+        # Bullet indicator
+        rows.append(f'<circle cx="44" cy="{y - 4}" r="4.5" fill="{color}"/>')
+        # Language name
+        rows.append(f'<text x="60" y="{y}" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="14">{esc(name)}</text>')
+        # Track background
+        rows.append(f'<rect x="200" y="{bar_y}" width="450" height="9" rx="4.5" fill="url(#langTrack)" stroke="#0d3d21" stroke-width="1"/>')
+        # Filled bar
+        rows.append(f'<rect x="200" y="{bar_y}" width="{bar_width:.1f}" height="9" rx="4.5" fill="{color}"/>')
+        # Percentage
+        rows.append(f'<text x="742" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="13" font-weight="bold">{percent:.2f}%</text>')
+
+    return svg_document(780, 215, ''.join(rows), "Himanshu's language contribution percentages")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:

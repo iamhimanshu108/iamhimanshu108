@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" height="180" />
+  <img src="./assets/language-contributions.svg" alt="Himanshu's language contribution percentages" width="100%" />
 </p>
 
 <p align="center">
-  <img src="./assets/github-activity.svg" alt="Himanshu's GitHub activity statistics" height="180" />
+  <img src="./assets/github-activity.svg" alt="Himanshu's GitHub activity statistics" width="100%" />
 </p>
