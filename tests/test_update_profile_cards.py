@@ -67,7 +67,7 @@ class ProfileCardTests(unittest.TestCase):
         self.assertIn("CURRENT STREAK", activity)
         self.assertIn("LONGEST STREAK", activity)
         self.assertIn("CONTRIBUTIONS / 1 YEAR", activity)
-        self.assertIn("contribution --graph", contribution_graph)
+        self.assertIn("contribution --monthly", contribution_graph)
         for svg in (activity, language_card, contribution_graph):
             self.assertTrue(svg.rstrip().endswith("</svg>"))
             ElementTree.fromstring(svg)

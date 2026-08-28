@@ -199,86 +199,99 @@ def render_languages_svg(languages: Counter[str]) -> str:
     return svg_document(780, 250, ''.join(rows), "Himanshu's language contribution percentages")
 
 
-def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
-    if not weeks:
-        weeks = [{"contributionDays": [{"date": "2026-01-01", "contributionCount": 0}]}]
+def monthly_contributions(weeks: list[dict[str, Any]]) -> list[tuple[str, int]]:
+    months_map: dict[tuple[int, int], int] = {}
+    for week in weeks:
+        for day in week.get("contributionDays", []):
+            if "date" in day:
+                try:
+                    dt = date.fromisoformat(day["date"])
+                    key = (dt.year, dt.month)
+                    months_map[key] = months_map.get(key, 0) + int(day.get("contributionCount", 0))
+                except Exception:
+                    pass
+    sorted_keys = sorted(months_map.keys())
+    if len(sorted_keys) > 12:
+        sorted_keys = sorted_keys[-12:]
+    if not sorted_keys:
+        return [(date(2026, m, 1).strftime("%b"), 0) for m in range(1, 13)]
+    return [(date(y, m, 1).strftime("%b"), months_map[(y, m)]) for y, m in sorted_keys]
 
-    counts = [sum(int(d.get("contributionCount", 0)) for d in w.get("contributionDays", [])) for w in weeks]
+
+def render_contribution_graph_svg(weeks: list[dict[str, Any]]) -> str:
+    months = monthly_contributions(weeks)
+    counts = [c for _, c in months]
     max_count = max(max(counts), 1)
 
-    left, right, top, bottom = 45.0, 735.0, 58.0, 160.0
-    width = right - left
-    height = bottom - top
-    n = max(len(weeks), 2)
+    margin = 44.0
+    total_w = 780.0
+    slot_w = (total_w - 2 * margin) / len(months)
+    bar_w = 32.0
+    baseline = 158.0
+    max_h = 86.0
 
-    points: list[tuple[float, float]] = []
-    for i, count in enumerate(counts):
-        x = left + (i / (n - 1)) * width
-        y = bottom - (count / max_count) * (height - 10)
-        points.append((x, y))
-
-    # Construct smooth cubic bezier path
-    path_d: list[str] = [f"M {points[0][0]:.1f},{points[0][1]:.1f}"]
-    for i in range(len(points) - 1):
-        p0 = points[i - 1] if i > 0 else points[i]
-        p1 = points[i]
-        p2 = points[i + 1]
-        p3 = points[i + 2] if i + 2 < len(points) else p2
-        cp1x = p1[0] + (p2[0] - p0[0]) / 6.0
-        cp1y = p1[1] + (p2[1] - p0[1]) / 6.0
-        cp2x = p2[0] - (p3[0] - p1[0]) / 6.0
-        cp2y = p2[1] - (p3[1] - p1[1]) / 6.0
-        path_d.append(f"C {cp1x:.1f},{cp1y:.1f} {cp2x:.1f},{cp2y:.1f} {p2[0]:.1f},{p2[1]:.1f}")
-
-    smooth_line = " ".join(path_d)
-    area_path = f"{smooth_line} L {points[-1][0]:.1f},{bottom:.1f} L {points[0][0]:.1f},{bottom:.1f} Z"
-
-    # Grid and Month Labels
     elements: list[str] = [
         '<defs>',
-        '  <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">',
-        '    <stop offset="0%" stop-color="#00d96f" stop-opacity="0.45"/>',
-        '    <stop offset="100%" stop-color="#00d96f" stop-opacity="0.0"/>',
+        '  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">',
+        '    <stop offset="0%" stop-color="#b6ff00"/>',
+        '    <stop offset="35%" stop-color="#00ff66"/>',
+        '    <stop offset="100%" stop-color="#008f44"/>',
         '  </linearGradient>',
-        '  <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">',
+        '  <linearGradient id="lineTrend" x1="0" y1="0" x2="1" y2="0">',
         '    <stop offset="0%" stop-color="#00ff66"/>',
         '    <stop offset="50%" stop-color="#45ff8f"/>',
         '    <stop offset="100%" stop-color="#b6ff00"/>',
         '  </linearGradient>',
         '</defs>',
-        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --graph</text>',
-        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">ANNUAL ACTIVITY</text>',
+        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ contribution --monthly</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">12-MONTH ACTIVITY</text>',
+        # Grid lines
+        '<line x1="44" y1="72" x2="736" y2="72" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
+        '<line x1="44" y1="115" x2="736" y2="115" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>',
+        '<line x1="44" y1="158" x2="736" y2="158" stroke="#176b38" stroke-width="1"/>',
     ]
 
-    # Gridlines
-    for grid_y in (top, top + height * 0.33, top + height * 0.66, bottom):
-        elements.append(f'<line x1="{left}" y1="{grid_y:.1f}" x2="{right}" y2="{grid_y:.1f}" stroke="#0d3d21" stroke-width="1" stroke-dasharray="4,4"/>')
+    points: list[tuple[float, float]] = []
 
-    # Shaded Area and Line Curve
-    elements.append(f'<path d="{area_path}" fill="url(#areaGradient)"/>')
-    elements.append(f'<path d="{smooth_line}" fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round"/>')
+    for i, (name, count) in enumerate(months):
+        center_x = margin + (i + 0.5) * slot_w
+        bar_x = center_x - bar_w / 2.0
+        bar_h = (count / max_count) * max_h if count > 0 else 0
+        bar_y = baseline - bar_h
 
-    # Highlight peaks with glowing points
-    for idx, (x, y) in enumerate(points):
-        if counts[idx] > 0 and (idx == 0 or counts[idx] >= counts[idx - 1]) and (idx == len(counts) - 1 or counts[idx] >= counts[idx + 1]):
-            elements.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
+        # Track background
+        elements.append(f'<rect x="{bar_x:.1f}" y="72" width="{bar_w}" height="86" rx="6" fill="#04180c" stroke="#0d3d21" stroke-width="1"/>')
 
-    # Month Labels along bottom
-    months_seen = set()
-    for i, week in enumerate(weeks):
-        days = week.get("contributionDays", [])
-        if days:
-            try:
-                dt = date.fromisoformat(days[0]["date"])
-                month_key = (dt.year, dt.month)
-                if month_key not in months_seen:
-                    months_seen.add(month_key)
-                    x = left + (i / (n - 1)) * width
-                    elements.append(f'<text x="{x:.1f}" y="185" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="11">{dt.strftime("%b")}</text>')
-            except Exception:
-                continue
+        if count > 0:
+            elements.append(f'<rect x="{bar_x:.1f}" y="{bar_y:.1f}" width="{bar_w}" height="{bar_h:.1f}" rx="6" fill="url(#barGradient)"/>')
+            elements.append(f'<text x="{center_x:.1f}" y="{bar_y - 6:.1f}" text-anchor="middle" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="11" font-weight="bold">{count}</text>')
+            points.append((center_x, bar_y))
+        else:
+            elements.append(f'<text x="{center_x:.1f}" y="148" text-anchor="middle" fill="#1b5e36" font-family="{SVG_MONO_FONT}" font-size="11">0</text>')
+            points.append((center_x, baseline))
 
-    return svg_document(780, 205, ''.join(elements), "Himanshu's contribution graph")
+        # Month label below
+        elements.append(f'<text x="{center_x:.1f}" y="185" text-anchor="middle" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="12" font-weight="bold">{esc(name)}</text>')
+
+    # Trend line overlay
+    if len(points) >= 2:
+        path_d: list[str] = [f"M {points[0][0]:.1f},{points[0][1]:.1f}"]
+        for i in range(len(points) - 1):
+            p0 = points[i - 1] if i > 0 else points[i]
+            p1 = points[i]
+            p2 = points[i + 1]
+            p3 = points[i + 2] if i + 2 < len(points) else p2
+            cp1x = p1[0] + (p2[0] - p0[0]) / 6.0
+            cp1y = p1[1] + (p2[1] - p0[1]) / 6.0
+            cp2x = p2[0] - (p3[0] - p1[0]) / 6.0
+            cp2y = p2[1] - (p3[1] - p1[1]) / 6.0
+            path_d.append(f"C {cp1x:.1f},{cp1y:.1f} {cp2x:.1f},{cp2y:.1f} {p2[0]:.1f},{p2[1]:.1f}")
+        elements.append(f'<path d="{" ".join(path_d)}" fill="none" stroke="url(#lineTrend)" stroke-width="2" stroke-dasharray="3,3"/>')
+
+    for pt_x, pt_y in points:
+        elements.append(f'<circle cx="{pt_x:.1f}" cy="{pt_y:.1f}" r="3.5" fill="#b6ff00" stroke="#020804" stroke-width="1.5"/>')
+
+    return svg_document(780, 210, ''.join(elements), "Himanshu's monthly contribution graph")
 
 
 def render_profile_gif(avatar: bytes, output: Path) -> None:
