@@ -48,6 +48,22 @@ class ProfileCardTests(unittest.TestCase):
         self.assertEqual([row[0] for row in rows], ["Python", "JavaScript", "HTML", "CSS", "Go", "Rust"])
         self.assertAlmostEqual(rows[0][2], 67.307, places=2)
 
+    def test_tech_stack_rows_are_sorted_limited_and_weighted(self):
+        stack = Counter({"React": 40, "Express": 25, "Spring Boot": 20, "Next.js": 15, "Node.js": 10, "FastAPI": 5, "MongoDB": 2})
+        rows = cards.tech_stack_rows(stack)
+        self.assertEqual([row[0] for row in rows], ["React", "Express", "Spring Boot", "Next.js", "Node.js", "FastAPI"])
+        self.assertEqual(len(rows), 6)
+        self.assertAlmostEqual(rows[0][2], 40 / 117 * 100, places=2)
+
+    def test_analyze_manifest_text_detects_frameworks(self):
+        counts = Counter()
+        cards.analyze_manifest_text('{"dependencies": {"react": "^18.0.0", "next": "14.0.0", "express": "^4.18.0"}}', counts)
+        cards.analyze_manifest_text('<artifactId>spring-boot-starter-web</artifactId>', counts)
+        self.assertIn("React", counts)
+        self.assertIn("Next.js", counts)
+        self.assertIn("Express", counts)
+        self.assertIn("Spring Boot", counts)
+
     def test_avatar_fetch_uses_github_response_and_falls_back_on_error(self):
         with patch.object(cards, "get_bytes", return_value=b"github-avatar"):
             self.assertEqual(cards.fetch_avatar_bytes("https://avatars.example/avatar.png"), b"github-avatar")
@@ -56,13 +72,16 @@ class ProfileCardTests(unittest.TestCase):
 
     def test_rendered_svgs_escape_labels_and_are_valid_xml(self):
         languages = Counter({"<script>": 9})
+        stack = Counter({"<React & Next>": 10, "Express": 5, "Spring Boot": 4})
         activity = cards.render_activity_svg({"count": 4}, {"count": 12}, 365)
         language_card = cards.render_languages_svg(languages)
+        stack_card = cards.render_tech_stack_svg(stack)
         self.assertIn("&lt;script&gt;", language_card)
+        self.assertIn("&lt;React &amp; Next&gt;", stack_card)
         self.assertIn("CURRENT STREAK", activity)
         self.assertIn("LONGEST STREAK", activity)
         self.assertIn("CONTRIBUTIONS / 1 YEAR", activity)
-        for svg in (activity, language_card):
+        for svg in (activity, language_card, stack_card):
             self.assertTrue(svg.rstrip().endswith("</svg>"))
             ElementTree.fromstring(svg)
 

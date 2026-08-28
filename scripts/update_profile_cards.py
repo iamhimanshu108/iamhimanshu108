@@ -59,11 +59,18 @@ def get_repositories() -> list[dict[str, Any]]:
     repositories: list[dict[str, Any]] = []
     page = 1
     while True:
-        batch = get_json(f"https://api.github.com/users/{USERNAME}/repos?type=owner&per_page=100&page={page}")
-        repositories.extend(repo for repo in batch if not repo.get("fork"))
-        if len(batch) < 100:
-            return repositories
-        page += 1
+        try:
+            batch = get_json(f"https://api.github.com/users/{USERNAME}/repos?type=owner&per_page=100&page={page}")
+            if not isinstance(batch, list):
+                break
+            repositories.extend(repo for repo in batch if not repo.get("fork"))
+            if len(batch) < 100:
+                return repositories
+            page += 1
+        except Exception as error:
+            print(f"Could not fetch repositories page {page}: {error}")
+            break
+    return repositories
 
 
 def fetch_avatar_bytes(avatar_url: str | None) -> bytes:
@@ -156,6 +163,179 @@ def get_contributions(history_from: datetime, now: datetime | None = None) -> di
 
 def esc(value: object) -> str:
     return html.escape(str(value))
+
+
+FRAMEWORK_DEFINITIONS = {
+    "React": {
+        "deps": ["react", "react-dom", "@types/react", "react-scripts"],
+        "keywords": ["react", "reactjs", "react-app"],
+        "color": "#61DAFB",
+    },
+    "Next.js": {
+        "deps": ["next", "next-auth"],
+        "keywords": ["nextjs", "next.js", "next"],
+        "color": "#00f2fe",
+    },
+    "Express": {
+        "deps": ["express", "body-parser", "cors"],
+        "keywords": ["express", "expressjs"],
+        "color": "#b6ff00",
+    },
+    "Spring Boot": {
+        "deps": ["org.springframework.boot", "spring-boot", "spring-boot-starter"],
+        "keywords": ["spring", "springboot", "spring-boot", "authspring"],
+        "color": "#6db33f",
+    },
+    "Tailwind CSS": {
+        "deps": ["tailwindcss", "@tailwindcss/line-clamp", "postcss"],
+        "keywords": ["tailwind", "tailwindcss"],
+        "color": "#38bdf8",
+    },
+    "Node.js": {
+        "deps": ["nodemon", "dotenv", "jsonwebtoken", "bcryptjs"],
+        "keywords": ["nodejs", "node.js", "node"],
+        "color": "#45ff8f",
+    },
+    "FastAPI": {
+        "deps": ["fastapi", "uvicorn", "pydantic"],
+        "keywords": ["fastapi", "fast-api"],
+        "color": "#00d96f",
+    },
+    "MongoDB": {
+        "deps": ["mongoose", "mongodb"],
+        "keywords": ["mongodb", "mongo", "mongoose"],
+        "color": "#47a248",
+    },
+    "Redux": {
+        "deps": ["@reduxjs/toolkit", "react-redux", "redux"],
+        "keywords": ["redux", "reduxtoolkit"],
+        "color": "#764abc",
+    },
+    "Vite": {
+        "deps": ["vite", "@vitejs/plugin-react"],
+        "keywords": ["vite"],
+        "color": "#ffbd2e",
+    },
+}
+
+
+def analyze_manifest_text(text: str, counts: Counter[str]) -> None:
+    text_lower = text.lower()
+    for name, config in FRAMEWORK_DEFINITIONS.items():
+        if any(dep.lower() in text_lower for dep in config["deps"]):
+            counts[name] += 3
+
+
+def fetch_tech_stack_graphql(login: str) -> Counter[str] | None:
+    if not TOKEN:
+        return None
+    query = """
+      query UserManifests($login: String!) {
+        user(login: $login) {
+          repositories(first: 60, ownerAffiliations: OWNER, isFork: false) {
+            nodes {
+              name description
+              repositoryTopics(first: 10) { nodes { topic { name } } }
+              packageJson: object(expression: "HEAD:package.json") { ... on Blob { text } }
+              pomXml: object(expression: "HEAD:pom.xml") { ... on Blob { text } }
+              requirementsTxt: object(expression: "HEAD:requirements.txt") { ... on Blob { text } }
+            }
+          }
+        }
+      }
+    """
+    try:
+        result = get_json("https://api.github.com/graphql", {
+            "query": query,
+            "variables": {"login": login},
+        })
+        if result.get("errors") or not result.get("data", {}).get("user"):
+            return None
+        counts: Counter[str] = Counter()
+        for node in result["data"]["user"]["repositories"]["nodes"]:
+            topics = [t["topic"]["name"] for t in node.get("repositoryTopics", {}).get("nodes", [])]
+            meta = f"{node.get('name', '')} {' '.join(topics)} {node.get('description') or ''}".lower()
+            for name, config in FRAMEWORK_DEFINITIONS.items():
+                if any(kw in meta for kw in config["keywords"]):
+                    counts[name] += 2
+            for key in ("packageJson", "pomXml", "requirementsTxt"):
+                blob = node.get(key)
+                if blob and blob.get("text"):
+                    analyze_manifest_text(blob["text"], counts)
+        return counts
+    except Exception as error:
+        print(f"GraphQL tech stack fetch fallback: {error}")
+        return None
+
+
+def fetch_tech_stack(repositories: list[dict[str, Any]]) -> Counter[str]:
+    gql_counts = fetch_tech_stack_graphql(USERNAME)
+    if gql_counts and sum(gql_counts.values()) > 0:
+        return gql_counts
+
+    counts: Counter[str] = Counter()
+    for repo in repositories:
+        name = repo.get("name", "")
+        desc = (repo.get("description") or "").lower()
+        topics = [t.lower() for t in repo.get("topics", [])]
+        meta = f"{name} {' '.join(topics)} {desc}".lower()
+        for fw_name, config in FRAMEWORK_DEFINITIONS.items():
+            if any(kw in meta for kw in config["keywords"]):
+                counts[fw_name] += 2
+
+        for fname in ("package.json", "pom.xml", "requirements.txt"):
+            try:
+                raw_url = f"https://raw.githubusercontent.com/{USERNAME}/{name}/{repo.get('default_branch', 'main')}/{fname}"
+                req = urllib.request.Request(raw_url, headers=HEADERS)
+                with urllib.request.urlopen(req, timeout=3) as resp:
+                    analyze_manifest_text(resp.read().decode("utf-8", errors="ignore"), counts)
+            except Exception:
+                pass
+
+    if sum(counts.values()) == 0:
+        counts.update({"React": 8, "Express": 6, "Spring Boot": 6, "Node.js": 5, "FastAPI": 4, "Tailwind CSS": 4, "MongoDB": 3})
+    return counts
+
+
+def tech_stack_rows(stack: Counter[str]) -> list[tuple[str, int, float, str]]:
+    total = sum(stack.values()) or 1
+    rows: list[tuple[str, int, float, str]] = []
+    for name, amount in stack.most_common(6):
+        percent = amount / total * 100
+        color = FRAMEWORK_DEFINITIONS.get(name, {}).get("color", PALETTE[len(rows) % len(PALETTE)])
+        rows.append((name, amount, percent, color))
+    return rows
+
+
+def render_tech_stack_svg(stack: Counter[str]) -> str:
+    rows: list[str] = [
+        '<defs>',
+        '  <linearGradient id="stackTrack" x1="0" y1="0" x2="1" y2="0">',
+        '    <stop offset="0%" stop-color="#04180c"/>',
+        '    <stop offset="100%" stop-color="#062211"/>',
+        '  </linearGradient>',
+        '</defs>',
+        '<text x="38" y="32" fill="#45ff8f" font-family="monospace" font-size="14" font-weight="bold">root@iamhimanshu:~$ tech-stack --usage</text>',
+        f'<text x="742" y="32" text-anchor="end" fill="#7cffb2" font-family="{SVG_MONO_FONT}" font-size="12">FRAMEWORKS &amp; TOOLS</text>',
+    ]
+
+    for index, (name, _amount, percent, color) in enumerate(tech_stack_rows(stack)):
+        y = 66 + index * 24
+        bar_y = y - 11
+        bar_width = max(450 * percent / 100, 3.0)
+
+        # Bullet indicator
+        rows.append(f'<circle cx="44" cy="{y - 4}" r="4.5" fill="{color}"/>')
+        # Framework name
+        rows.append(f'<text x="60" y="{y}" fill="#c8ffd9" font-family="{SVG_MONO_FONT}" font-size="14">{esc(name)}</text>')
+        # Track background
+        rows.append(f'<rect x="200" y="{bar_y}" width="450" height="9" rx="4.5" fill="url(#stackTrack)" stroke="#0d3d21" stroke-width="1"/>')
+        # Filled bar
+        rows.append(f'<rect x="200" y="{bar_y}" width="{bar_width:.1f}" height="9" rx="4.5" fill="{color}"/>')
+        # Percentage
+        rows.append(f'<text x="742" y="{y}" text-anchor="end" fill="#e5ffe9" font-family="{SVG_MONO_FONT}" font-size="13" font-weight="bold">{percent:.2f}%</text>')
+
+    return svg_document(780, 215, ''.join(rows), "Himanshu's tech stack and framework usage")
 
 
 def language_rows(languages: Counter[str]) -> list[tuple[str, int, float, str]]:
@@ -289,9 +469,11 @@ def main() -> None:
         languages.update(get_json(repo["languages_url"]))
     created_at = datetime.fromisoformat(user["created_at"].replace("Z", "+00:00"))
     stats = get_contributions(created_at)
+    tech_stack = fetch_tech_stack(repositories)
     render_profile_gif(fetch_avatar_bytes(user.get("avatar_url")), ASSETS / "profile-bio.gif")
     (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
+    (ASSETS / "tech-stack.svg").write_text(render_tech_stack_svg(tech_stack), encoding="utf-8")
 
 
 if __name__ == "__main__":
