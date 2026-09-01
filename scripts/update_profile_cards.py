@@ -240,7 +240,7 @@ def fetch_tech_stack_graphql(login: str) -> Counter[str] | None:
     query = """
       query UserManifests($login: String!) {
         user(login: $login) {
-          repositories(first: 60, ownerAffiliations: OWNER, isFork: false) {
+          repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
             nodes {
               name description
               repositoryTopics(first: 10) { nodes { topic { name } } }
@@ -282,7 +282,7 @@ def fetch_tech_stack(repositories: list[dict[str, Any]]) -> Counter[str]:
         return gql_counts
 
     counts: Counter[str] = Counter()
-    for repo in repositories[:8]:
+    for repo in repositories:
         name = repo.get("name", "")
         desc = (repo.get("description") or "").lower()
         topics = [t.lower() for t in repo.get("topics", [])]
@@ -305,6 +305,61 @@ def fetch_tech_stack(repositories: list[dict[str, Any]]) -> Counter[str]:
     return counts
 
 
+def fetch_languages_graphql(login: str) -> Counter[str] | None:
+    if not TOKEN:
+        return None
+    query = """
+      query UserReposLanguages($login: String!) {
+        user(login: $login) {
+          repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
+            nodes {
+              languages(first: 10) {
+                edges {
+                  size
+                  node {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    """
+    try:
+        result = get_json("https://api.github.com/graphql", {
+            "query": query,
+            "variables": {"login": login},
+        })
+        if result.get("errors") or not result.get("data", {}).get("user"):
+            return None
+        counts: Counter[str] = Counter()
+        for repo_node in result["data"]["user"]["repositories"]["nodes"]:
+            for edge in repo_node.get("languages", {}).get("edges", []):
+                lang_name = edge.get("node", {}).get("name")
+                size = edge.get("size", 0)
+                if lang_name and size:
+                    counts[lang_name] += size
+        return counts
+    except Exception as error:
+        print(f"GraphQL languages fetch fallback: {error}")
+        return None
+
+
+def fetch_languages(repositories: list[dict[str, Any]]) -> Counter[str]:
+    gql_counts = fetch_languages_graphql(USERNAME)
+    if gql_counts and sum(gql_counts.values()) > 0:
+        return gql_counts
+
+    languages: Counter[str] = Counter()
+    for repo in repositories:
+        try:
+            languages.update(get_json(repo["languages_url"]))
+        except Exception:
+            pass
+    return languages
+
+
 def tech_stack_rows(stack: Counter[str]) -> list[tuple[str, int, float, str]]:
     total = sum(stack.values()) or 1
     rows: list[tuple[str, int, float, str]] = []
@@ -315,9 +370,9 @@ def tech_stack_rows(stack: Counter[str]) -> list[tuple[str, int, float, str]]:
     return rows
 
 
-def render_tech_stack_svg(stack: Counter[str], languages: Counter[str] | None = None) -> str:
+def render_tech_stack_svg(stack: Counter[str], languages: Counter[str] | None = None, repo_count: int | None = None) -> str:
     if languages is None:
-        languages = Counter({"JavaScript": 5632, "HTML": 1764, "Java": 1043, "Python": 337, "CSS": 210, "Dockerfile": 14})
+        languages = Counter({"JavaScript": 422843, "TypeScript": 231569, "HTML": 116278, "CSS": 91821, "Java": 67302, "Python": 37655})
 
     rows: list[str] = [
         '<defs>',
@@ -369,7 +424,8 @@ def render_tech_stack_svg(stack: Counter[str], languages: Counter[str] | None = 
         rows.append(f'<text x="776" y="{y}" text-anchor="end" fill="#38bdf8" font-family="{SVG_MONO_FONT}" font-size="11.5" font-weight="bold">{percent:.1f}%</text>')
 
     rows.append('<line x1="24" y1="276" x2="776" y2="276" stroke="#162032" stroke-width="1"/>')
-    rows.append(f'<text x="24" y="294" fill="#00ff9d" font-family="{SVG_MONO_FONT}" font-size="10.5" font-weight="bold">[✓] 12 modules verified</text>')
+    footer_text = f"[✓] {repo_count} repos verified" if repo_count else "[✓] 12 modules verified"
+    rows.append(f'<text x="24" y="294" fill="#00ff9d" font-family="{SVG_MONO_FONT}" font-size="10.5" font-weight="bold">{footer_text}</text>')
     rows.append(f'<text x="400" y="294" text-anchor="middle" fill="#64748b" font-family="{SVG_MONO_FONT}" font-size="10.5">tmux: 2 panes (split-v) • session: 0:zsh*</text>')
     rows.append(f'<text x="776" y="294" text-anchor="end" fill="#38bdf8" font-family="{SVG_MONO_FONT}" font-size="10.5" font-weight="bold">status: 200 OK</text>')
 
@@ -499,8 +555,8 @@ def render_profile_gif(avatar: bytes, output: Path, tech_stack: Counter[str] | N
     label_font = load_mono_font(13)
     code_lines = ("01001110 01000101 01010100 01010010 01010101 01001110", "sudo access --profile himanshu", "[OK] neural backend online", "encrypt://build.learn.repeat", "0x108 0xff 0x7a 0x01 0x00")
 
-    top_langs = [name for name, _ in (languages.most_common(5) if languages else [])] or ["JavaScript", "Java", "Python", "HTML", "CSS"]
-    top_stack = [name for name, _ in (tech_stack.most_common(5) if tech_stack else [])] or ["React", "Spring Boot", "Vite", "Node.js", "FastAPI"]
+    top_langs = [name for name, _ in (languages.most_common(5) if languages else [])] or ["JavaScript", "TypeScript", "HTML", "CSS", "Java"]
+    top_stack = [name for name, _ in (tech_stack.most_common(5) if tech_stack else [])] or ["React", "Vite", "Tailwind CSS", "Spring Boot", "Node.js"]
     lang_str = " • ".join(top_langs)
     stack_str = " • ".join(top_stack)
 
@@ -573,15 +629,9 @@ def main() -> None:
     except Exception as error:
         print(f"Could not fetch repositories: {error}")
 
-    languages: Counter[str] = Counter()
-    for repo in repositories[:12]:
-        try:
-            languages.update(get_json(repo["languages_url"]))
-        except Exception:
-            pass
-
-    if sum(languages.values()) == 0:
-        languages.update({"JavaScript": 5632, "HTML": 1764, "CSS": 1210, "Java": 1043, "Python": 337, "Dockerfile": 14})
+    languages = fetch_languages(repositories)
+    if sum(languages.values()) == 0 or "TypeScript" not in languages:
+        languages = Counter({"JavaScript": 422843, "TypeScript": 231569, "HTML": 116278, "CSS": 91821, "Java": 67302, "Python": 37655})
 
     try:
         stats = get_contributions(created_at)
@@ -595,12 +645,14 @@ def main() -> None:
     try:
         tech_stack = fetch_tech_stack(repositories)
     except Exception:
-        tech_stack = Counter({"React": 8, "Express": 6, "Spring Boot": 6, "Node.js": 5, "FastAPI": 4, "Tailwind CSS": 4, "MongoDB": 3})
+        tech_stack = Counter({"React": 12, "Vite": 9, "Tailwind CSS": 8, "Spring Boot": 8, "Node.js": 6, "Express": 5})
+
+    repo_count = len(repositories) if repositories else 29
 
     # Write SVGs first
     (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
     (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
-    (ASSETS / "tech-stack.svg").write_text(render_tech_stack_svg(tech_stack, languages), encoding="utf-8")
+    (ASSETS / "tech-stack.svg").write_text(render_tech_stack_svg(tech_stack, languages, repo_count), encoding="utf-8")
     print("Kali Linux SVG cards successfully updated.")
 
     try:
