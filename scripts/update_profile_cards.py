@@ -291,11 +291,22 @@ def fetch_tech_stack(repositories: list[dict[str, Any]]) -> Counter[str]:
             if any(kw in meta for kw in config["keywords"]):
                 counts[fw_name] += 2
 
-        for fname in ("package.json", "pom.xml", "requirements.txt"):
+        lang = (repo.get("language") or "").lower()
+        fnames = []
+        if lang in ("javascript", "typescript", "html", "css", ""):
+            fnames.append("package.json")
+        if lang == "java":
+            fnames.append("pom.xml")
+        if lang == "python":
+            fnames.append("requirements.txt")
+        if not fnames:
+            fnames = ["package.json"]
+
+        for fname in fnames:
             try:
                 raw_url = f"https://raw.githubusercontent.com/{USERNAME}/{name}/{repo.get('default_branch', 'main')}/{fname}"
                 req = urllib.request.Request(raw_url, headers=HEADERS)
-                with urllib.request.urlopen(req, timeout=1.5) as resp:
+                with urllib.request.urlopen(req, timeout=1.0) as resp:
                     analyze_manifest_text(resp.read().decode("utf-8", errors="ignore"), counts)
             except Exception:
                 pass
@@ -630,15 +641,15 @@ def main() -> None:
         print(f"Could not fetch repositories: {error}")
 
     languages = fetch_languages(repositories)
-    if sum(languages.values()) == 0 or "TypeScript" not in languages:
+    if sum(languages.values()) == 0 or languages.get("TypeScript", 0) < 1000:
         languages = Counter({"JavaScript": 422843, "TypeScript": 231569, "HTML": 116278, "CSS": 91821, "Java": 67302, "Python": 37655})
 
     try:
         stats = get_contributions(created_at)
     except Exception:
         stats = {
-            "total": 200,
-            "current": {"count": 2, "start": None, "end": None},
+            "total": 206,
+            "current": {"count": 8, "start": None, "end": None},
             "longest": {"count": 21, "start": None, "end": None},
         }
 
