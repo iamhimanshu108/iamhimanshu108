@@ -1,0 +1,36 @@
+name: Update profile cards (Weekly)
+
+on:
+  schedule:
+    - cron: '15 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install image renderer
+        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Fetch GitHub profile data (Weekly)
+        env:
+          GITHUB_USERNAME: iamhimanshu108
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/update_profile_cards.py --mode weekly
+      - name: Commit refreshed cards
+        run: |
+          git add assets/profile-bio.gif assets/language-contributions.svg assets/tech-stack.svg
+          if git diff --cached --quiet; then
+            echo "No profile card changes"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: refresh weekly profile cards [skip ci]"
+            git push
+          fi

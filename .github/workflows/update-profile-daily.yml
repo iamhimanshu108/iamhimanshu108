@@ -1,4 +1,4 @@
-name: Update profile cards
+name: Update profile cards (Daily)
 
 on:
   schedule:
@@ -9,28 +9,26 @@ permissions:
   contents: write
 
 jobs:
-  update:
+  update-daily:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Install image renderer
-        run: python -m pip install --disable-pip-version-check Pillow
-      - name: Fetch GitHub profile data
+      - name: Fetch GitHub profile data (Daily)
         env:
           GITHUB_USERNAME: iamhimanshu108
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python scripts/update_profile_cards.py
+        run: python scripts/update_profile_cards.py --mode daily
       - name: Commit refreshed cards
         run: |
-          git add assets/profile-bio.gif assets/github-activity.svg assets/language-contributions.svg assets/tech-stack.svg
+          git add assets/github-activity.svg
           if git diff --cached --quiet; then
             echo "No profile card changes"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: refresh profile cards [skip ci]"
+            git commit -m "chore: refresh daily profile cards [skip ci]"
             git push
           fi

@@ -623,6 +623,11 @@ def render_profile_gif(avatar: bytes, output: Path, tech_stack: Counter[str] | N
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', choices=['daily', 'weekly', 'all'], default='all')
+    args = parser.parse_args()
+
     ASSETS.mkdir(exist_ok=True)
     try:
         user = get_json(f"https://api.github.com/users/{USERNAME}")
@@ -635,42 +640,45 @@ def main() -> None:
         created_at = datetime.now(timezone.utc)
 
     repositories: list[dict[str, Any]] = []
-    try:
-        repositories = get_repositories()
-    except Exception as error:
-        print(f"Could not fetch repositories: {error}")
+    if args.mode in ['weekly', 'all']:
+        try:
+            repositories = get_repositories()
+        except Exception as error:
+            print(f"Could not fetch repositories: {error}")
 
-    languages = fetch_languages(repositories)
-    if sum(languages.values()) == 0 or languages.get("TypeScript", 0) < 1000:
-        languages = Counter({"JavaScript": 422843, "TypeScript": 231569, "HTML": 116278, "CSS": 91821, "Java": 67302, "Python": 37655})
+        languages = fetch_languages(repositories)
+        if sum(languages.values()) == 0 or languages.get("TypeScript", 0) < 1000:
+            languages = Counter({"JavaScript": 422843, "TypeScript": 231569, "HTML": 116278, "CSS": 91821, "Java": 67302, "Python": 37655})
 
-    try:
-        stats = get_contributions(created_at)
-    except Exception:
-        stats = {
-            "total": 206,
-            "current": {"count": 8, "start": None, "end": None},
-            "longest": {"count": 21, "start": None, "end": None},
-        }
+        try:
+            tech_stack = fetch_tech_stack(repositories)
+        except Exception:
+            tech_stack = Counter({"React": 12, "Vite": 9, "Tailwind CSS": 8, "Spring Boot": 8, "Node.js": 6, "Express": 5})
 
-    try:
-        tech_stack = fetch_tech_stack(repositories)
-    except Exception:
-        tech_stack = Counter({"React": 12, "Vite": 9, "Tailwind CSS": 8, "Spring Boot": 8, "Node.js": 6, "Express": 5})
+        repo_count = len(repositories) if repositories else 29
 
-    repo_count = len(repositories) if repositories else 29
+        (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
+        (ASSETS / "tech-stack.svg").write_text(render_tech_stack_svg(tech_stack, languages, repo_count), encoding="utf-8")
+        print("Kali Linux SVG cards (tech-stack, languages) successfully updated.")
 
-    # Write SVGs first
-    (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
-    (ASSETS / "language-contributions.svg").write_text(render_languages_svg(languages), encoding="utf-8")
-    (ASSETS / "tech-stack.svg").write_text(render_tech_stack_svg(tech_stack, languages, repo_count), encoding="utf-8")
-    print("Kali Linux SVG cards successfully updated.")
+        try:
+            render_profile_gif(fetch_avatar_bytes(avatar_url), ASSETS / "profile-bio.gif", tech_stack, languages)
+            print("profile-bio.gif successfully updated.")
+        except Exception as error:
+            print(f"Could not render profile GIF: {error}")
 
-    try:
-        render_profile_gif(fetch_avatar_bytes(avatar_url), ASSETS / "profile-bio.gif", tech_stack, languages)
-        print("profile-bio.gif successfully updated.")
-    except Exception as error:
-        print(f"Could not render profile GIF: {error}")
+    if args.mode in ['daily', 'all']:
+        try:
+            stats = get_contributions(created_at)
+        except Exception:
+            stats = {
+                "total": 206,
+                "current": {"count": 8, "start": None, "end": None},
+                "longest": {"count": 21, "start": None, "end": None},
+            }
+        
+        (ASSETS / "github-activity.svg").write_text(render_activity_svg(stats["current"], stats["longest"], stats["total"]), encoding="utf-8")
+        print("github-activity.svg successfully updated.")
 
 
 if __name__ == "__main__":
