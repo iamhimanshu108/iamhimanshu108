@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=iamhimanshu108&theme=tokyonight&hide_border=true" alt="GitHub Streak" />
+  <img src="./assets/streak.svg" alt="GitHub Streak" />
 </p>
 
 <p align="center">

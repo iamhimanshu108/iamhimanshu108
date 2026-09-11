@@ -19,11 +19,19 @@ jobs:
       - name: Fetch GitHub profile data (Daily)
         env:
           GITHUB_USERNAME: iamhimanshu108
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
         run: python scripts/update_profile_cards.py --mode daily
+
+      - name: Generate Streak Stats (includes private repos if PAT is set)
+        uses: DenverCoder1/github-readme-streak-stats@main
+        with:
+          options: "user=iamhimanshu108&theme=tokyonight&hide_border=true"
+          path: "assets/streak.svg"
+          token: ${{ secrets.PROFILE_PAT }}
+
       - name: Commit refreshed cards
         run: |
-          git add assets/github-activity.svg
+          git add assets/github-activity.svg assets/streak.svg
           if git diff --cached --quiet; then
             echo "No profile card changes"
           else
@@ -32,3 +40,4 @@ jobs:
             git commit -m "chore: refresh daily profile cards [skip ci]"
             git push
           fi
+

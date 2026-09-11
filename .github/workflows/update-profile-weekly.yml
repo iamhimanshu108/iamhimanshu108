@@ -21,7 +21,7 @@ jobs:
       - name: Fetch GitHub profile data (Weekly)
         env:
           GITHUB_USERNAME: iamhimanshu108
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
         run: python scripts/update_profile_cards.py --mode weekly
       - name: Commit refreshed cards
         run: |
