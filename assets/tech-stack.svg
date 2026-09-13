@@ -1,8 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="316" viewBox="0 0 800 316" role="img" aria-labelledby="title desc">
-  <title id="title">kali@iamhimanshu: ~/arsenal (tmux: 2 panes)</title><desc id="desc">GitHub profile statistics for iamhimanshu108.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="340" viewBox="0 0 800 340" role="img" aria-labelledby="title desc">
+  <title id="title">kali@iamhimanshu: ~/arsenal (tmux: 2 panes)</title>
+  <desc id="desc">GitHub profile statistics for iamhimanshu108.</desc>
   <defs>
     <clipPath id="cardClip">
-      <rect width="800" height="316" rx="12"/>
+      <rect width="800" height="340" rx="12"/>
     </clipPath>
     <linearGradient id="kaliBorder" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.85"/>
@@ -13,17 +14,173 @@
       <stop offset="0%" stop-color="#0f192c"/>
       <stop offset="100%" stop-color="#090e18"/>
     </linearGradient>
+    <linearGradient id="stackTrack" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0b1320"/>
+      <stop offset="100%" stop-color="#0d1829"/>
+    </linearGradient>
+    <linearGradient id="langTrack" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0b1320"/>
+      <stop offset="100%" stop-color="#0d1829"/>
+    </linearGradient>
   </defs>
-  <rect width="800" height="316" rx="12" fill="#070c16"/>
+
+  <!-- Background -->
+  <rect width="800" height="340" rx="12" fill="#070c16"/>
+
+  <!-- Header bar -->
   <g clip-path="url(#cardClip)">
     <rect width="800" height="36" fill="url(#kaliHeader)"/>
     <line x1="0" y1="36" x2="800" y2="36" stroke="#1e2d4a" stroke-width="1"/>
   </g>
+
+  <!-- Traffic lights -->
   <circle cx="20" cy="18" r="5.5" fill="#ff5555"/>
   <circle cx="38" cy="18" r="5.5" fill="#ffb86c"/>
   <circle cx="56" cy="18" r="5.5" fill="#50fa7b"/>
+
+  <!-- Title bar text -->
   <text x="400" y="22" text-anchor="middle" fill="#64748b" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11" font-weight="bold">kali@iamhimanshu: ~/arsenal (tmux: 2 panes)</text>
   <text x="780" y="22" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10" font-weight="bold" letter-spacing="1">zsh • kali-rolling</text>
-  <rect x="1" y="1" width="798" height="314" rx="11" fill="none" stroke="url(#kaliBorder)" stroke-width="1.5"/>
-  <defs>  <linearGradient id="stackTrack" x1="0" y1="0" x2="1" y2="0">    <stop offset="0%" stop-color="#0b1320"/>    <stop offset="100%" stop-color="#0d1829"/>  </linearGradient>  <linearGradient id="langTrack" x1="0" y1="0" x2="1" y2="0">    <stop offset="0%" stop-color="#0b1320"/>    <stop offset="100%" stop-color="#0d1829"/>  </linearGradient></defs><!-- Pane Divider Line --><line x1="398" y1="36" x2="398" y2="276" stroke="#1c2c48" stroke-width="1.5" stroke-dasharray="4 3"/><!-- Left Pane: Frameworks --><g font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5">  <text x="24" y="62"><tspan fill="#3b8eea">┌──(</tspan><tspan fill="#ff5555" font-weight="bold">root</tspan><tspan fill="#3b8eea">㉿</tspan><tspan fill="#00f0ff" font-weight="bold">iamhimanshu</tspan><tspan fill="#3b8eea">)-[</tspan><tspan fill="#94a3b8">~/stack</tspan><tspan fill="#3b8eea">]</tspan></text>  <text x="24" y="80"><tspan fill="#3b8eea">└─#</tspan> <tspan fill="#00f0ff" font-weight="bold">./audit-stack --all</tspan></text></g><rect x="254" y="52" width="128" height="22" rx="4" fill="#0f1f38" stroke="#1d4ed8" stroke-width="1"/><text x="318" y="67" text-anchor="middle" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="9.5" font-weight="bold" letter-spacing="0.5">FRAMEWORKS</text><!-- Right Pane: Languages --><g font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5">  <text x="416" y="62"><tspan fill="#3b8eea">┌──(</tspan><tspan fill="#ff5555" font-weight="bold">root</tspan><tspan fill="#3b8eea">㉿</tspan><tspan fill="#00f0ff" font-weight="bold">iamhimanshu</tspan><tspan fill="#3b8eea">)-[</tspan><tspan fill="#94a3b8">~/langs</tspan><tspan fill="#3b8eea">]</tspan></text>  <text x="416" y="80"><tspan fill="#3b8eea">└─#</tspan> <tspan fill="#00f0ff" font-weight="bold">cloc --by-lang --top</tspan></text></g><rect x="652" y="52" width="124" height="22" rx="4" fill="#0f1f38" stroke="#1d4ed8" stroke-width="1"/><text x="714" y="67" text-anchor="middle" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="9.5" font-weight="bold" letter-spacing="0.5">LANGUAGES</text><circle cx="32" cy="110" r="4" fill="#00f0ff"/><text x="44" y="114" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">React</text><rect x="156" y="105" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="105" width="43.8" height="7" rx="3.5" fill="#00f0ff"/><text x="382" y="114" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">28.2%</text><circle cx="32" cy="134" r="4" fill="#ffb86c"/><text x="44" y="138" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Vite</text><rect x="156" y="129" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="129" width="30.0" height="7" rx="3.5" fill="#ffb86c"/><text x="382" y="138" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">19.4%</text><circle cx="32" cy="158" r="4" fill="#34d399"/><text x="44" y="162" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Node.js</text><rect x="156" y="153" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="153" width="25.0" height="7" rx="3.5" fill="#34d399"/><text x="382" y="162" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">16.1%</text><circle cx="32" cy="182" r="4" fill="#38bdf8"/><text x="44" y="186" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Tailwind CSS</text><rect x="156" y="177" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="177" width="21.2" height="7" rx="3.5" fill="#38bdf8"/><text x="382" y="186" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">13.7%</text><circle cx="32" cy="206" r="4" fill="#00ff9d"/><text x="44" y="210" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Express</text><rect x="156" y="201" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="201" width="18.8" height="7" rx="3.5" fill="#00ff9d"/><text x="382" y="210" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">12.1%</text><circle cx="32" cy="230" r="4" fill="#6ee7b7"/><text x="44" y="234" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Spring Boot</text><rect x="156" y="225" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="156" y="225" width="10.0" height="7" rx="3.5" fill="#6ee7b7"/><text x="382" y="234" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">6.5%</text><circle cx="424" cy="110" r="4" fill="#00f0ff"/><text x="436" y="114" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">TypeScript</text><rect x="548" y="105" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="105" width="73.7" height="7" rx="3.5" fill="#00f0ff"/><text x="776" y="114" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">47.5%</text><circle cx="424" cy="134" r="4" fill="#38bdf8"/><text x="436" y="138" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">JavaScript</text><rect x="548" y="129" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="129" width="41.5" height="7" rx="3.5" fill="#38bdf8"/><text x="776" y="138" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">26.8%</text><circle cx="424" cy="158" r="4" fill="#00ff9d"/><text x="436" y="162" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">HTML</text><rect x="548" y="153" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="153" width="15.1" height="7" rx="3.5" fill="#00ff9d"/><text x="776" y="162" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">9.8%</text><circle cx="424" cy="182" r="4" fill="#ffb86c"/><text x="436" y="186" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">CSS</text><rect x="548" y="177" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="177" width="11.9" height="7" rx="3.5" fill="#ffb86c"/><text x="776" y="186" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">7.7%</text><circle cx="424" cy="206" r="4" fill="#a78bfa"/><text x="436" y="210" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">PHP</text><rect x="548" y="201" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="201" width="7.5" height="7" rx="3.5" fill="#a78bfa"/><text x="776" y="210" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">4.8%</text><circle cx="424" cy="230" r="4" fill="#f43f5e"/><text x="436" y="234" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Java</text><rect x="548" y="225" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/><rect x="548" y="225" width="3.5" height="7" rx="3.5" fill="#f43f5e"/><text x="776" y="234" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">1.9%</text><line x1="24" y1="276" x2="776" y2="276" stroke="#162032" stroke-width="1"/><text x="24" y="294" fill="#00ff9d" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5" font-weight="bold">[✓] 31 repos verified</text><text x="400" y="294" text-anchor="middle" fill="#64748b" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5">tmux: 2 panes (split-v) • session: 0:zsh*</text><text x="776" y="294" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5" font-weight="bold">status: 200 OK</text>
+
+  <!-- Border -->
+  <rect x="1" y="1" width="798" height="338" rx="11" fill="none" stroke="url(#kaliBorder)" stroke-width="1.5"/>
+
+  <!-- Pane Divider Line -->
+  <line x1="398" y1="36" x2="398" y2="296" stroke="#1c2c48" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- ==================== LEFT PANE: FRAMEWORKS ==================== -->
+
+  <!-- Kali prompt -->
+  <g font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5">
+    <text x="24" y="62">
+      <tspan fill="#3b8eea">┌──(</tspan><tspan fill="#ff5555" font-weight="bold">root</tspan><tspan fill="#3b8eea">㉿</tspan><tspan fill="#00f0ff" font-weight="bold">iamhimanshu</tspan><tspan fill="#3b8eea">)-[</tspan><tspan fill="#94a3b8">~/stack</tspan><tspan fill="#3b8eea">]</tspan>
+    </text>
+    <text x="24" y="80">
+      <tspan fill="#3b8eea">└─#</tspan> <tspan fill="#00f0ff" font-weight="bold">./audit-stack --all</tspan>
+    </text>
+  </g>
+
+  <!-- FRAMEWORKS badge -->
+  <rect x="254" y="52" width="128" height="22" rx="4" fill="#0f1f38" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="318" y="67" text-anchor="middle" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="9.5" font-weight="bold" letter-spacing="0.5">FRAMEWORKS</text>
+
+  <!-- 1. React — 22.5% -->
+  <circle cx="32" cy="104" r="4" fill="#00f0ff"/>
+  <text x="44" y="108" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">React</text>
+  <rect x="156" y="99" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="99" width="34.9" height="7" rx="3.5" fill="#00f0ff"/>
+  <text x="382" y="108" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">22.5%</text>
+
+  <!-- 2. Next.js — 18.3% -->
+  <circle cx="32" cy="125" r="4" fill="#f1f5f9"/>
+  <text x="44" y="129" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Next.js</text>
+  <rect x="156" y="120" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="120" width="28.4" height="7" rx="3.5" fill="#f1f5f9"/>
+  <text x="382" y="129" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">18.3%</text>
+
+  <!-- 3. Node.js — 16.1% -->
+  <circle cx="32" cy="146" r="4" fill="#34d399"/>
+  <text x="44" y="150" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Node.js</text>
+  <rect x="156" y="141" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="141" width="24.9" height="7" rx="3.5" fill="#34d399"/>
+  <text x="382" y="150" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">16.1%</text>
+
+  <!-- 4. Express — 14.2% -->
+  <circle cx="32" cy="167" r="4" fill="#ffb86c"/>
+  <text x="44" y="171" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Express</text>
+  <rect x="156" y="162" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="162" width="22.0" height="7" rx="3.5" fill="#ffb86c"/>
+  <text x="382" y="171" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">14.2%</text>
+
+  <!-- 5. Spring Boot — 11.4% -->
+  <circle cx="32" cy="188" r="4" fill="#6ee7b7"/>
+  <text x="44" y="192" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Spring Boot</text>
+  <rect x="156" y="183" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="183" width="17.7" height="7" rx="3.5" fill="#6ee7b7"/>
+  <text x="382" y="192" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">11.4%</text>
+
+  <!-- 6. FastAPI — 9.8% -->
+  <circle cx="32" cy="209" r="4" fill="#00ff9d"/>
+  <text x="44" y="213" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">FastAPI</text>
+  <rect x="156" y="204" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="204" width="15.2" height="7" rx="3.5" fill="#00ff9d"/>
+  <text x="382" y="213" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">9.8%</text>
+
+  <!-- 7. Django — 7.7% -->
+  <circle cx="32" cy="230" r="4" fill="#a78bfa"/>
+  <text x="44" y="234" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Django</text>
+  <rect x="156" y="225" width="155" height="7" rx="3.5" fill="url(#stackTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="156" y="225" width="11.9" height="7" rx="3.5" fill="#a78bfa"/>
+  <text x="382" y="234" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">7.7%</text>
+
+  <!-- ==================== RIGHT PANE: LANGUAGES ==================== -->
+
+  <!-- Kali prompt -->
+  <g font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5">
+    <text x="416" y="62">
+      <tspan fill="#3b8eea">┌──(</tspan><tspan fill="#ff5555" font-weight="bold">root</tspan><tspan fill="#3b8eea">㉿</tspan><tspan fill="#00f0ff" font-weight="bold">iamhimanshu</tspan><tspan fill="#3b8eea">)-[</tspan><tspan fill="#94a3b8">~/langs</tspan><tspan fill="#3b8eea">]</tspan>
+    </text>
+    <text x="416" y="80">
+      <tspan fill="#3b8eea">└─#</tspan> <tspan fill="#00f0ff" font-weight="bold">cloc --by-lang --top</tspan>
+    </text>
+  </g>
+
+  <!-- LANGUAGES badge -->
+  <rect x="652" y="52" width="124" height="22" rx="4" fill="#0f1f38" stroke="#1d4ed8" stroke-width="1"/>
+  <text x="714" y="67" text-anchor="middle" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="9.5" font-weight="bold" letter-spacing="0.5">LANGUAGES</text>
+
+  <!-- 1. TypeScript — 47.5% -->
+  <circle cx="424" cy="104" r="4" fill="#00f0ff"/>
+  <text x="436" y="108" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">TypeScript</text>
+  <rect x="548" y="99" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="99" width="73.7" height="7" rx="3.5" fill="#00f0ff"/>
+  <text x="776" y="108" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">47.5%</text>
+
+  <!-- 2. JavaScript — 20.3% -->
+  <circle cx="424" cy="125" r="4" fill="#38bdf8"/>
+  <text x="436" y="129" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">JavaScript</text>
+  <rect x="548" y="120" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="120" width="31.5" height="7" rx="3.5" fill="#38bdf8"/>
+  <text x="776" y="129" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">20.3%</text>
+
+  <!-- 3. Python — 12.6% -->
+  <circle cx="424" cy="146" r="4" fill="#ffb86c"/>
+  <text x="436" y="150" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Python</text>
+  <rect x="548" y="141" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="141" width="19.5" height="7" rx="3.5" fill="#ffb86c"/>
+  <text x="776" y="150" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">12.6%</text>
+
+  <!-- 4. HTML — 7.2% -->
+  <circle cx="424" cy="167" r="4" fill="#00ff9d"/>
+  <text x="436" y="171" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">HTML</text>
+  <rect x="548" y="162" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="162" width="11.2" height="7" rx="3.5" fill="#00ff9d"/>
+  <text x="776" y="171" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">7.2%</text>
+
+  <!-- 5. CSS — 5.4% -->
+  <circle cx="424" cy="188" r="4" fill="#f43f5e"/>
+  <text x="436" y="192" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">CSS</text>
+  <rect x="548" y="183" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="183" width="8.4" height="7" rx="3.5" fill="#f43f5e"/>
+  <text x="776" y="192" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">5.4%</text>
+
+  <!-- 6. Java — 4.1% -->
+  <circle cx="424" cy="209" r="4" fill="#a78bfa"/>
+  <text x="436" y="213" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">Java</text>
+  <rect x="548" y="204" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="204" width="6.4" height="7" rx="3.5" fill="#a78bfa"/>
+  <text x="776" y="213" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">4.1%</text>
+
+  <!-- 7. PHP — 2.9% -->
+  <circle cx="424" cy="230" r="4" fill="#6ee7b7"/>
+  <text x="436" y="234" fill="#f1f5f9" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="12" font-weight="bold">PHP</text>
+  <rect x="548" y="225" width="155" height="7" rx="3.5" fill="url(#langTrack)" stroke="#1a2b48" stroke-width="1"/>
+  <rect x="548" y="225" width="4.5" height="7" rx="3.5" fill="#6ee7b7"/>
+  <text x="776" y="234" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="11.5" font-weight="bold">2.9%</text>
+
+  <!-- ==================== FOOTER ==================== -->
+  <line x1="24" y1="296" x2="776" y2="296" stroke="#162032" stroke-width="1"/>
+  <text x="24" y="318" fill="#00ff9d" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5" font-weight="bold">[✓] 31 repos verified</text>
+  <text x="400" y="318" text-anchor="middle" fill="#64748b" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5">tmux: 2 panes (split-v) • session: 0:zsh*</text>
+  <text x="776" y="318" text-anchor="end" fill="#38bdf8" font-family="Fira Code, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="10.5" font-weight="bold">status: 200 OK</text>
 </svg>
